@@ -1,0 +1,27 @@
+{
+    "manifest_version": 2,
+    "name": "Wordle Helper",
+    "version": "1.0",
+    "description": "Solving Wordle has never been easier!",
+    
+    "icons": {
+        "48": "images/icon-48.png"
+    },
+
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "wordle-helper@lucaalbinati"
+        }
+    },
+
+    "browser_action": {
+        "default_icon": "images/icon-48.png",
+        "default_title": "Wordle Helper",
+        "default_popup": "popup/wordle_helper.html"
+    },
+
+    "permissions": [
+        "tabs",
+        "storage"
+    ]    
+}
