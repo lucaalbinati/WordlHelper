@@ -2,29 +2,30 @@
 
 <html>
   <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8"> <link rel="stylesheet" href="wordle_helper.css">
   </head>
 
 <body>
     <h1>Wordle Helper</h1>
     <div id="error-content">
-        <p>Can't help you when you are not on Wordle.</p>
-        <p>Try to go on Wordle.</p>
+        <p class="error-message">Can't help you when you are not on Wordle.</p>
+        <p class="error-message">Try to go on Wordle.</p>
     </div>
     <div id="helper">
         <div id="helper-options">
             <div id="helper-option-unknown-letters-only">
-                <p>
-                    <label class="switch">
-                        <input id="unknown-letters-only-switch" type="checkbox">
-                    </label>
+                <label class="switch">
+                    <input id="unknown-letters-only-switch" type="checkbox">
+                    <span class="slider round"></span>
+                </label>
+                <p class="option">
                     Show words with unknown letters only
                 </p>
             </div>
         </div>
         <div>
             <h3>List of possible words to try</h3>
-            <div id="possible-words"></div>
+            <div id="possible-words" class="words"></div>
         </div>
     </div>
 
