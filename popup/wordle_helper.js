@@ -15,6 +15,8 @@ document.getElementById("unknown-letters-only-switch").onclick = function() {
     let useOnlyUnknownLetters = document.getElementById("unknown-letters-only-switch").checked
     browser.storage.sync.set({useOnlyUnknownLetters})
     console.log(`set 'useOnlyUnknownLetters' to '${useOnlyUnknownLetters}'`)
+
+    updateList()
 }
 
 function loadWordList() {
@@ -45,32 +47,57 @@ function loadHelperOptions() {
     })
 }
 
-// function findCorrectSpotLetters() {
-//     browser.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
-//         console.log(tabs[0].url)
-//         console.log(tabs[0])
-//         console.log(tabs[0].document.getElementById("a"))
-//         console.log(tabs[0].document.getElementById("keyboard"))
-//     })
+function getLetterStates(callback) {
+    browser.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        browser.tabs.sendMessage(tabs[0].id, {command: "getLetterStates"}, function(message) {
+            if (message.response) {
+                console.log(message.response)
+                callback(message.response)
+            } else {
+                console.log("didn't received the expected response for 'getLetterStates'")
+            }
+        })
+    })
 
-// }
+}
+
+function updateList() {
+    console.log("updating list...")
+
+    getLetterStates(function(letter_states) {
+        updateListWithLetterStates(letter_states)
+    })
+}
+
+function updateListWithLetterStates(letter_states) {
+    let useOnlyUnknownLetters = document.getElementById("unknown-letters-only-switch").checked
+    filterWords(letter_states, useOnlyUnknownLetters)
+}
+
+function filterWords(letter_states, useOnlyUnknownLetters) {
+    var available_letters = Object.keys(letter_states)
+    
+    if (useOnlyUnknownLetters) {
+        available_letters = available_letters.filter(letter => letter_states[letter] == "unknown")
+    }
+
+    browser.storage.local.get("wordList", function(result) {
+        if (result.wordList) {
+            let filteredWords = result.wordList.filter(word => {
+                for (const letter of word) {
+                    if (!available_letters.includes(letter)) {
+                        return false
+                    }
+                }
+                return true
+            })
+            document.getElementById("possible-words").innerText = filteredWords.join("\n")
+        }
+    })
+}
 
 function loadHelper() {
     loadWordList()
     loadHelperOptions()
-
-    // findCorrectSpotLetters()
-    // findIncorrectSpotLetters()
-    
-    let useOnlyUnknownLetters = document.getElementById("unknown-letters-only-switch").checked
-    filterWords(useOnlyUnknownLetters)
-}
-
-function filterWords(useOnlyUnknownLetters) {
-    browser.storage.local.get("wordList", function(result) {
-        if (result.wordList) {
-            let filteredWords = result.wordList//.filter(w => w.includes("hack"))
-            document.getElementById("possible-words").innerText = filteredWords.join("\n")
-        }
-    })
+    updateList()
 }

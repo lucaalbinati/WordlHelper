@@ -20,6 +20,14 @@
         "default_popup": "popup/wordle_helper.html"
     },
 
+    "content_scripts": [
+        {
+          "matches": ["https://www.powerlanguage.co.uk/wordle/"],
+          "js": ["content-script.js"]
+        }
+    ],
+      
+
     "permissions": [
         "tabs",
         "storage"
