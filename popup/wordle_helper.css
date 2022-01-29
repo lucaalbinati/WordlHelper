@@ -39,6 +39,7 @@ div {
     height: 23px;
     position: relative;
     width: 40px;
+    margin-left: 10px;
 }
 
 .switch input {
