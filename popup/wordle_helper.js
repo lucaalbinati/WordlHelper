@@ -10,12 +10,19 @@ browser.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) 
     }
 })
 
+const HELPER_OPTIONS_KEY = "helperOptions"
+let helperOptionDefaults = {
+    "unknown-letters-only-switch": false,
+    "include-correct-letters-switch": false
+}
+let helperOptionNames = Object.keys(helperOptionDefaults)
 
-document.getElementById("unknown-letters-only-switch").onclick = function() {
-    let useOnlyUnknownLetters = document.getElementById("unknown-letters-only-switch").checked
-    browser.storage.sync.set({useOnlyUnknownLetters})
-    console.log(`set 'useOnlyUnknownLetters' to '${useOnlyUnknownLetters}'`)
+helperOptionNames.forEach(option => document.getElementById(option).onclick = updateHelperOptions)
 
+function updateHelperOptions() {
+    let helperOptions = {}
+    helperOptionNames.forEach(option => helperOptions[option] = document.getElementById(option).checked)
+    browser.storage.sync.set({helperOptions})
     updateList()
 }
 
@@ -35,14 +42,15 @@ function loadWordList() {
 }
 
 function loadHelperOptions() {
-    browser.storage.sync.get("useOnlyUnknownLetters", function(result) {
-        if (result.useOnlyUnknownLetters != null) {
-            console.log(`found 'useOnlyUnknownLetters' in storage, with value '${result.useOnlyUnknownLetters}'`)
-            document.getElementById("unknown-letters-only-switch").checked = result.useOnlyUnknownLetters
+    browser.storage.sync.get(HELPER_OPTIONS_KEY, function(result) {
+        if (result == null || result[HELPER_OPTIONS_KEY] == null || !helperOptionNames.every(option => result[HELPER_OPTIONS_KEY][option] != undefined)) {
+            console.log(`key '${HELPER_OPTIONS_KEY}' was either not in storage or was missing fields... resetting it to defaults`)
+            let helperOptions = {}
+            helperOptionNames.forEach(option => helperOptions[option] = helperOptionDefaults[option])
+            browser.storage.sync.set({helperOptions})
         } else {
-            console.log("did not find 'useOnlyUnknownLetters' in storage")
-            let useOnlyUnknownLetters = false
-            browser.storage.sync.set({useOnlyUnknownLetters}, () => console.log(`set 'useOnlyUnknownLetters' to '${useOnlyUnknownLetters}'`))
+            console.log(`found '${HELPER_OPTIONS_KEY}' key in storage`)
+            helperOptionNames.forEach(option => document.getElementById(option).checked = result[HELPER_OPTIONS_KEY][option])
         }
     })
 }
