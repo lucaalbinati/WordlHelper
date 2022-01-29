@@ -12,12 +12,28 @@ browser.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) 
 
 const HELPER_OPTIONS_KEY = "helperOptions"
 let helperOptionDefaults = {
-    "unknown-letters-only-switch": false,
-    "include-correct-letters-switch": false
+    "unknown-letters-only": false,
+    "include-correct-letters": false
 }
 let helperOptionNames = Object.keys(helperOptionDefaults)
 
-helperOptionNames.forEach(option => document.getElementById(option).onclick = updateHelperOptions)
+helperOptionNames.forEach(option => document.getElementById(option).onclick = checkHelperOptionsConsistency)
+helperOptionNames.forEach(option => document.getElementById(option).onchange = updateHelperOptions)
+
+function checkHelperOptionsConsistency(event) {
+    switch (event.target.id) {
+        case "unknown-letters-only": {
+            if (document.getElementById("unknown-letters-only").checked) {
+                document.getElementById("include-correct-letters").checked = false
+            }
+        }
+        case "include-correct-letters": {
+            if (document.getElementById("include-correct-letters").checked) {
+                document.getElementById("unknown-letters-only").checked = false
+            }
+        }
+    }
+}
 
 function updateHelperOptions() {
     let helperOptions = {}
@@ -78,15 +94,20 @@ function updateList() {
 }
 
 function updateListWithLetterStates(letter_states) {
-    let useOnlyUnknownLetters = document.getElementById("unknown-letters-only-switch").checked
-    filterWords(letter_states, useOnlyUnknownLetters)
+    let helperOptions = {}
+    helperOptionNames.forEach(option => helperOptions[option] = document.getElementById(option).checked)
+    filterWords(letter_states, helperOptions)
 }
 
-function filterWords(letter_states, useOnlyUnknownLetters) {
+function filterWords(letter_states, helperOptions) {
     var available_letters = Object.keys(letter_states)
     
-    if (useOnlyUnknownLetters) {
+    if (helperOptions["unknown-letters-only"]) {
         available_letters = available_letters.filter(letter => letter_states[letter] == "unknown")
+    }
+
+    if (!helperOptions["include-correct-letters"]) {
+        available_letters = available_letters.filter(letter => letter_states[letter] != "correct")
     }
 
     browser.storage.local.get("wordList", function(result) {
