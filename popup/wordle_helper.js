@@ -13,6 +13,7 @@ browser.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) 
 const HELPER_OPTIONS_KEY = "helperOptions"
 let helperOptionDefaults = {
     "unknown-letters-only": false,
+    "include-present-letters": false,
     "include-correct-letters": false
 }
 let helperOptionNames = Object.keys(helperOptionDefaults)
@@ -24,7 +25,13 @@ function checkHelperOptionsConsistency(event) {
     switch (event.target.id) {
         case "unknown-letters-only": {
             if (document.getElementById("unknown-letters-only").checked) {
+                document.getElementById("include-present-letters").checked = false
                 document.getElementById("include-correct-letters").checked = false
+            }
+        }
+        case "include-present-letters": {
+            if (document.getElementById("include-present-letters").checked) {
+                document.getElementById("unknown-letters-only").checked = false
             }
         }
         case "include-correct-letters": {
@@ -106,7 +113,12 @@ function filterWords(letter_states, helperOptions) {
         available_letters = available_letters.filter(letter => letter_states[letter] == "unknown")
     }
 
+    if (!helperOptions["include-presentt-letters"]) {
+        available_letters = available_letters.filter(letter => letter_states[letter] != "present")
+    }
+
     if (!helperOptions["include-correct-letters"]) {
+        // TODO using correct letters should also consider the position
         available_letters = available_letters.filter(letter => letter_states[letter] != "correct")
     }
 
