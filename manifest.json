@@ -1,6 +1,6 @@
 {
     "manifest_version": 2,
-    "name": "Wordle Helper",
+    "name": "WordlHelper",
     "version": "1.0",
     "description": "Solving Wordle has never been easier!",
     
@@ -10,14 +10,14 @@
 
     "browser_specific_settings": {
         "gecko": {
-            "id": "wordle-helper@lucaalbinati"
+            "id": "wordlhelper@lucaalbinati"
         }
     },
 
     "browser_action": {
         "default_icon": "images/icon-48.png",
-        "default_title": "Wordle Helper",
-        "default_popup": "popup/wordle_helper.html"
+        "default_title": "WordlHelper",
+        "default_popup": "popup/wordlhelper.html"
     },
 
     "content_scripts": [
