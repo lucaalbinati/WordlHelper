@@ -118,7 +118,7 @@ function filterWords(letter_states, helperOptions) {
     }
 
     if (!helperOptions["include-correct-letters"]) {
-        // TODO using correct letters should also consider the position
+        // TODO using correct letters should also consider the position (change how we gather the letters in 'content-script.js' by looking at the word grid instead)
         available_letters = available_letters.filter(letter => letter_states[letter] != "correct")
     }
 
