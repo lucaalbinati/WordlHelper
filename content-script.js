@@ -48,7 +48,7 @@ function scrapeLetterStates() {
 }
 
 function cleanLetterStates(letter_states) {
-    for (const [letter, value] of Object.entries(letter_states)) {
+    for (let [letter, value] of Object.entries(letter_states)) {
         if (value == ABSENT) {
             continue
         }

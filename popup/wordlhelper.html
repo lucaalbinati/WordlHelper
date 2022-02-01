@@ -6,47 +6,76 @@
   </head>
 
 <body>
-    <h1>Wordle Helper</h1>
-    <div id="error-content">
-        <p class="error-message">Can't help you when you are not on Wordle.</p>
-        <p class="error-message">Try to go on Wordle.</p>
-    </div>
-    <div id="helper">
-        <div id="helper-options">
-            <div id="helper-option-unknown-letters-only">
-                <label class="switch">
-                    <input id="unknown-letters-only" type="checkbox">
-                    <span class="slider round"></span>
-                </label>
-                <p class="option">
-                    Use only unknown letters
-                </p>
-            </div>
-            <div id="helper-option-include-present-letters">
-                <label class="switch">
-                    <input id="include-present-letters" type="checkbox">
-                    <span class="slider round"></span>
-                </label>
-                <p class="option">
-                    Include present letters
-                </p>
-            </div>
-            <div id="helper-option-include-correct-letters">
-                <label class="switch">
-                    <input id="include-correct-letters" type="checkbox">
-                    <span class="slider round"></span>
-                </label>
-                <p class="option">
-                    Include correct letters
-                </p>
-            </div>
+    <div id="container" class="container">
+        <div class="title">
+            <h1>WordlHelper</h1>
         </div>
-        <div>
-            <h3>List of possible words to try</h3>
-            <div id="possible-words" class="words"></div>
+        
+        <div id="error" class="error">
+            <p>Can't help you when you are not on Wordle.</p>
+            <p>Try to go on <a href="https://www.powerlanguage.co.uk/wordle/">Wordle</a>.</p>
         </div>
-    </div>
 
+        <div id="helper" class="helper">
+            <div class="inner-helper">
+                <h3>Options</h3>
+
+                <div>
+                    <p>Use only unknown letters
+                        <label class="switch option">
+                            <input id="unknown-letters-only" type="checkbox">
+                            <span class="slider round"></span>
+                        </label>
+                    </p>
+                </div>
+
+                <div>
+                    <p>Include present letters
+                        <label class="switch option">
+                            <input id="include-present-letters" type="checkbox">
+                            <span class="slider round"></span>
+                        </label>
+                    </p>
+                </div>
+
+                <div>
+                    <p>Use correctly guessed letters
+                        <label class="switch option">
+                            <input id="use-correct-letters" type="checkbox">
+                            <span class="slider round"></span>
+                        </label>
+                    </p>
+                </div>
+            </div>
+            
+            <div class="inner-helper">
+                <h3>Specify word using wildcards</h3>
+                <div class="wildword-container">
+                    <div class="wildword-box">
+                        <p id="wildword-box-text-0"></p>
+                    </div>
+                    <div class="wildword-box">
+                        <p id="wildword-box-text-1"></p>
+                    </div>
+                    <div class="wildword-box">
+                        <p id="wildword-box-text-2"></p>
+                    </div>
+                    <div class="wildword-box">
+                        <p id="wildword-box-text-3"></p>
+                    </div>
+                    <div class="wildword-box">
+                        <p id="wildword-box-text-4"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="inner-helper">
+                <h3>Possible words</h3>
+                <div id="possible-words-list" class="possible-words"></div>
+            </div>
+        </div>
+    </div>
+    
     <script src="wordlhelper.js"></script>
 </body>
 
