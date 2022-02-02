@@ -1,23 +1,53 @@
 
+////////////////////////////////////
+///////////  Constants  ////////////
+////////////////////////////////////
+
+const WILDCARDS = Array.from(document.getElementsByClassName("wildword-box-selectable"))
+const WILDWORD_LETTERS = Array.from()
+
+
+////////////////////////////////////
+//////////////  MAIN  //////////////
+////////////////////////////////////
+
 browser.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
     var url = tabs[0].url
 
     if (url.includes("powerlanguage.co.uk/wordle")) {
         document.getElementById("error").hidden = true
-        loadHelper()
+        setupEventListeners()
+        loadWordList()
     } else {
         document.getElementById("helper").hidden = true
     }
 })
 
-document.getElementById("github-image").onclick = function() {
-    window.open("https://github.com/lucaalbinati/WordlHelper")
-    window.close()
+////////////////////////////////////
+//////  Event Listener Setup  //////
+////////////////////////////////////
+
+function setupEventListeners() {
+    setupGitHubEventListener()
+    setupWildwordSelectablesEventListener()
 }
 
-function loadHelper() {
-    loadWordList()
+function setupGitHubEventListener() {
+    document.getElementById("github-image").onclick = function() {
+        window.open("https://github.com/lucaalbinati/WordlHelper")
+        window.close()
+    }
 }
+
+function setupWildwordSelectablesEventListener() {
+    wildcards.forEach(element => {
+        element.onclick = wildwordBoxSelected
+    })    
+}
+
+////////////////////////////////////
+////////  Word List Setup  /////////
+////////////////////////////////////
 
 function loadWordList() {
     browser.storage.local.get("wordList", function(result) {
@@ -34,16 +64,35 @@ function loadWordList() {
     })
 }
 
-document.onclick = function() {
-    console.log("clicked popup document")
-    browser.storage.sync.get("letter_states", function(result) {
-        console.log("found in storage:")
-        console.log(result)
-        console.log(result.letter_states)
-    })
+////////////////////////////////////
+//////  Wildword Logic & UI  ///////
+////////////////////////////////////
+
+function wildwordBoxSelected(event) {
+    switch (event.target.id) {
+        case "wildword-box-all":
+        case "wildword-box-unknown":
+            
+            break
+        
+        case "wildword-box-present":
+        case "wildword-box-correct":
+    }
 }
 
 
+
+
+
+                
+// document.onclick = function() {
+//     browser.storage.sync.get("letter_states", function(result) {
+//         console.log("found in storage:")
+//         console.log(result)
+//         console.log(result.letter_states)
+//     })
+// }
+                
 // const UNKNOWN_LETTER_COLOR = "#787c7e"
 // const PRESENT_LETTER_COLOR = "#c9b458"
 // const CORRECT_LETTER_COLOR = "#6aaa64"
