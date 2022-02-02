@@ -3,9 +3,15 @@
 ///////////  Constants  ////////////
 ////////////////////////////////////
 
-const WILDCARDS = Array.from(document.getElementsByClassName("wildword-box-selectable"))
-const WILDWORD_LETTERS = Array.from()
+const WILDCARDS = Array.from(document.getElementsByClassName("wildcard selectable"))
+const WILDWORD_LETTERS = Array.from(document.getElementById("wildword-letters").children)
 
+const WILDCARD_ALL = "wildcard-all"
+const WILDCARD_UNKNOWN = "wildcard-unknown"
+const WILDCARD_PRESENT = "wildcard-present"
+const WILDCARD_CORRECT = "wildcard-correct"
+
+let wildcardSelected = null
 
 ////////////////////////////////////
 //////////////  MAIN  //////////////
@@ -40,8 +46,9 @@ function setupGitHubEventListener() {
 }
 
 function setupWildwordSelectablesEventListener() {
-    wildcards.forEach(element => {
-        element.onclick = wildwordBoxSelected
+    WILDCARDS.forEach(wildcard => {
+        wildcard.onclick = wildcardClicked
+        
     })    
 }
 
@@ -65,20 +72,106 @@ function loadWordList() {
 }
 
 ////////////////////////////////////
-//////  Wildword Logic & UI  ///////
+//////  Wildcard Logic & UI  ///////
 ////////////////////////////////////
 
-function wildwordBoxSelected(event) {
-    switch (event.target.id) {
-        case "wildword-box-all":
-        case "wildword-box-unknown":
+function wildcardClicked(event) {
+    if (wildcardSelected != null) {
+        wildcardSelected.classList.remove("selected")
+        wildcardSelected.classList.add("selectable")
+
+        if (event.target == wildcardSelected) {
+            wildcardSelected = null
+        } else {
+            event.target.classList.add("selected")
+            event.target.classList.remove("selectable")
+            wildcardSelected = event.target
+        }
+    } else {
+        event.target.classList.add("selected")
+        event.target.classList.remove("selectable")
+        wildcardSelected = event.target
+    }
+
+    updateWildwordLetters()
+}
+
+function updateWildwordLetters() {
+    if (wildcardSelected == null) {
+        throw new Exception(`Expected 'wildcardSelected' to be non-null`)
+    }
+
+    if (wildcardSelected == null) {
+        WILDWORD_LETTERS.forEach(wildwordLetter => {
+            wildwordLetter.classList.remove("potential")
+            console.log(wildwordLetter.classList)
+        })
+    } else {
+        switch (wildcardSelected.id) {
+            case WILDCARD_ALL:
+            case WILDCARD_UNKNOWN:
+                WILDWORD_LETTERS.forEach(wildwordLetter => {
+                    wildwordLetter.classList.add("potential")
+                })
+                break
             
-            break
-        
-        case "wildword-box-present":
-        case "wildword-box-correct":
+            case WILDCARD_PRESENT:
+                browser.storage.sync.get("letter_states", function(result) {
+                    console.log(result.letter_states)
+                    console.info(result.letter_states)
+                    console.warn(result.letter_states)
+
+                    // let present_letters_positions = new Set()
+
+                    // for (let [letter, value] of Object.entries(result.letter_states)) {
+                    //     if (value == "absent") {
+                    //         continue
+                    //     }
+
+                    //     if ("present" in value) {
+                    //         value["present"].forEach(position => present_letters_positions.add(position))
+                    //     }
+                    // }
+
+                    // for (let position of present_letters_positions) {
+                    //     WILDWORD_LETTERS[position].classList.add("potential")
+                    // }
+                })
+
+                break
+
+            case WILDCARD_CORRECT:
+
+                break
+        }
     }
 }
+
+// function wildcardSelected(event) {
+//     console.log(event.target)
+//     // event.target.checked = true
+//     console.log(event.target.checked)
+//     // event.target.className = event.target.className.replace("selectable", "selected")
+
+//     switch (event.target.id) {
+//         case WILDCARD_ALL:
+//         case WILDCARD_UNKNOWN:
+//             WILDWORD_LETTERS.forEach(wildwordLetter => {
+//                 wildwordLetter.className += " potential"
+//             })
+//             break
+        
+//         case WILDCARD_PRESENT:
+
+//             break
+
+//         case WILDCARD_CORRECT:
+
+//             break
+//     }
+
+//     // event.target.checked = false
+// }
 
 
 
