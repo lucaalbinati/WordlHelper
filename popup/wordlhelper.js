@@ -10,6 +10,11 @@ browser.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) 
     }
 })
 
+document.getElementById("github-image").onclick = function() {
+    window.open("https://github.com/lucaalbinati/WordlHelper")
+    window.close()
+}
+
 let HELPER_OPTIONS_KEY = "helperOptions"
 const UNKNOWN_LETTERS_ONLY = "unknown-letters-only"
 const INCLUDE_PRESENT_LETTERS = "include-present-letters"
