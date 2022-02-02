@@ -22,53 +22,61 @@
 
         <div id="helper" class="helper">
             <div class="inner-helper">
-                <h3>Options</h3>
-
-                <div>
-                    <p>Use only unknown letters
-                        <label class="switch option">
-                            <input id="unknown-letters-only" type="checkbox">
-                            <span class="slider round"></span>
-                        </label>
-                    </p>
-                </div>
-
-                <div>
-                    <p>Include present letters
-                        <label class="switch option">
-                            <input id="include-present-letters" type="checkbox">
-                            <span class="slider round"></span>
-                        </label>
-                    </p>
-                </div>
-
-                <div>
-                    <p>Use correctly guessed letters
-                        <label class="switch option">
-                            <input id="use-correct-letters" type="checkbox">
-                            <span class="slider round"></span>
-                        </label>
-                    </p>
-                </div>
-            </div>
-            
-            <div class="inner-helper">
                 <h3>Specify word using wildcards</h3>
+                
+                <div class="wildword-options">
+                    <div class="wildword-option">
+                        <div class="wildword-box wildword-box-all">
+                            <p>*</p>
+                        </div>
+                        <div class="wildword-option-description">
+                            <p>Any letter</p>
+                        </div>
+                    </div>
+
+                    <div class="wildword-option">
+                        <div class="wildword-box wildword-box-unknown">
+                            <p>?</p>
+                        </div>
+                        <div class="wildword-option-description">
+                            <p>Unknown letter</p>
+                        </div>
+                    </div>
+
+                    <div class="wildword-option">
+                        <div class="wildword-box wildword-box-present">
+                            <p>P</p>
+                        </div>
+                        <div class="wildword-option-description">
+                            <p>Present letter</p>
+                        </div>
+                    </div>
+
+                    <div class="wildword-option">
+                        <div class="wildword-box wildword-box-correct">
+                            <p>C</p>
+                        </div>
+                        <div class="wildword-option-description">
+                            <p>Correct letter</p>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="wildword-container">
-                    <div class="wildword-box">
-                        <p id="wildword-box-text-0"></p>
+                    <div class="wildword-box wildword-box-all">
+                        <p id="wildword-box-text-0">*</p>
                     </div>
-                    <div class="wildword-box">
-                        <p id="wildword-box-text-1"></p>
+                    <div class="wildword-box wildword-box-all">
+                        <p id="wildword-box-text-1">*</p>
                     </div>
-                    <div class="wildword-box">
-                        <p id="wildword-box-text-2"></p>
+                    <div class="wildword-box wildword-box-all">
+                        <p id="wildword-box-text-2">*</p>
                     </div>
-                    <div class="wildword-box">
-                        <p id="wildword-box-text-3"></p>
+                    <div class="wildword-box wildword-box-all">
+                        <p id="wildword-box-text-3">*</p>
                     </div>
-                    <div class="wildword-box">
-                        <p id="wildword-box-text-4"></p>
+                    <div class="wildword-box wildword-box-all">
+                        <p id="wildword-box-text-4">*</p>
                     </div>
                 </div>
             </div>
@@ -79,7 +87,7 @@
             </div>
         </div>
     </div>
-    
+
     <script src="wordlhelper.js"></script>
 </body>
 

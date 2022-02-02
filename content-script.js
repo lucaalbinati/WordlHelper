@@ -5,6 +5,11 @@ const CORRECT = "correct"
 const PRESENT = "present"
 const ABSENT = "absent"
 
+document.onchange = function() {
+    let letter_states = getLetterStates()
+    browser.storage.sync.set({letter_states}, () => console.log("stored new 'letter_states'"))
+}
+
 function hasDuplicates(array) {
     return (new Set(array)).size !== array.length;
 }
@@ -65,20 +70,8 @@ function cleanLetterStates(letter_states) {
     }
 }
 
-function handleMessage(request, sender, sendResponse) {
-    switch (request.command) {
-        case GET_LETTER_STATES_COMMAND:
-            console.log(`received '${GET_LETTER_STATES_COMMAND}' command`)
-        
-            var letter_states = scrapeLetterStates()
-            cleanLetterStates(letter_states)
-        
-            console.log(`sending response to '${GET_LETTER_STATES_COMMAND}'`)
-            
-            sendResponse({response: letter_states})
-
-            break
-    }
+function getLetterStates() {
+    var letter_states = scrapeLetterStates()
+    cleanLetterStates(letter_states)
+    return letter_states
 }
-
-browser.runtime.onMessage.addListener(handleMessage)
