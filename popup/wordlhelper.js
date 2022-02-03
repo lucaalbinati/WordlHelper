@@ -1,4 +1,6 @@
 
+console.log("in here")
+
 ////////////////////////////////////
 ///////////  Constants  ////////////
 ////////////////////////////////////
@@ -17,12 +19,23 @@ let wildcardSelected = null
 //////////////  MAIN  //////////////
 ////////////////////////////////////
 
-browser.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
+var b = null
+
+if (navigator.userAgent.includes("Chrome")) {
+    b = chrome
+    console.log("Recognized Chrome browser")
+} else if (navigator.userAgent.includes("Firefox")) {
+    b = browser
+    console.log("Recognized Firefox browser")
+}
+
+b.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
     var url = tabs[0].url
+    
+    setupEventListeners()
 
     if (url.includes("powerlanguage.co.uk/wordle")) {
         document.getElementById("error").hidden = true
-        setupEventListeners()
         loadWordList()
     } else {
         document.getElementById("helper").hidden = true
@@ -48,7 +61,6 @@ function setupGitHubEventListener() {
 function setupWildwordSelectablesEventListener() {
     WILDCARDS.forEach(wildcard => {
         wildcard.onclick = wildcardClicked
-        
     })    
 }
 
@@ -57,13 +69,13 @@ function setupWildwordSelectablesEventListener() {
 ////////////////////////////////////
 
 function loadWordList() {
-    browser.storage.local.get("wordList", function(result) {
+    b.storage.local.get("wordList", function(result) {
         if (result.wordList == null) {
             let textUrl = "https://raw.githubusercontent.com/dwyl/english-words/master/words_alpha.txt"
 
             fetch(textUrl).then(r => r.text()).then(t => {
                 let wordList = t.split("\r\n").filter(w => w.length == 5)
-                browser.storage.local.set({wordList}, () => console.log("loaded and stored 'wordList'"))
+                b.storage.local.set({wordList}, () => console.log("loaded and stored 'wordList'"))
             })
         } else {
             console.log("'wordList' has already been loaded")
@@ -76,6 +88,8 @@ function loadWordList() {
 ////////////////////////////////////
 
 function wildcardClicked(event) {
+    console.log("clicked")
+
     if (wildcardSelected != null) {
         wildcardSelected.classList.remove("selected")
         wildcardSelected.classList.add("selectable")
@@ -87,63 +101,80 @@ function wildcardClicked(event) {
             event.target.classList.remove("selectable")
             wildcardSelected = event.target
         }
+
+        removeWildwordLettersPotential()
     } else {
         event.target.classList.add("selected")
         event.target.classList.remove("selectable")
         wildcardSelected = event.target
     }
 
-    updateWildwordLetters()
+    if (wildcardSelected != null) {
+        updateWildwordLetters()
+    }
+}
+
+function removeWildwordLettersPotential() {
+    WILDWORD_LETTERS.forEach(wildwordLetter => {
+        wildwordLetter.classList.remove("potential")
+        console.log(wildwordLetter.classList)
+    })
 }
 
 function updateWildwordLetters() {
-    if (wildcardSelected == null) {
-        throw new Exception(`Expected 'wildcardSelected' to be non-null`)
-    }
+    switch (wildcardSelected.id) {
+        case WILDCARD_ALL:
+        case WILDCARD_UNKNOWN:
+            WILDWORD_LETTERS.forEach(wildwordLetter => {
+                wildwordLetter.classList.add("potential")
+            })
+            break
+        
+        case WILDCARD_PRESENT:
+            b.storage.sync.get("letter_states", function(result) {
+                console.log(result.letter_states)
 
-    if (wildcardSelected == null) {
-        WILDWORD_LETTERS.forEach(wildwordLetter => {
-            wildwordLetter.classList.remove("potential")
-            console.log(wildwordLetter.classList)
-        })
-    } else {
-        switch (wildcardSelected.id) {
-            case WILDCARD_ALL:
-            case WILDCARD_UNKNOWN:
-                WILDWORD_LETTERS.forEach(wildwordLetter => {
-                    wildwordLetter.classList.add("potential")
-                })
-                break
-            
-            case WILDCARD_PRESENT:
-                browser.storage.sync.get("letter_states", function(result) {
-                    console.log(result.letter_states)
-                    console.info(result.letter_states)
-                    console.warn(result.letter_states)
+                let present_letters_positions = new Set()
 
-                    // let present_letters_positions = new Set()
+                for (let [letter, value] of Object.entries(result.letter_states)) {
+                    if (value == "absent") {
+                        continue
+                    }
 
-                    // for (let [letter, value] of Object.entries(result.letter_states)) {
-                    //     if (value == "absent") {
-                    //         continue
-                    //     }
+                    if ("present" in value) {
+                        value["present"].forEach(position => present_letters_positions.add(position))
+                    }
+                }
 
-                    //     if ("present" in value) {
-                    //         value["present"].forEach(position => present_letters_positions.add(position))
-                    //     }
-                    // }
+                for (let position of present_letters_positions) {
+                    WILDWORD_LETTERS[position].classList.add("potential")
+                }
+            })
 
-                    // for (let position of present_letters_positions) {
-                    //     WILDWORD_LETTERS[position].classList.add("potential")
-                    // }
-                })
+            break
 
-                break
+        case WILDCARD_CORRECT:
+            b.storage.sync.get("letter_states", function(result) {
+                console.log(result.letter_states)
 
-            case WILDCARD_CORRECT:
+                let correct_letters_positions = new Set()
 
-                break
-        }
+                for (let [letter, value] of Object.entries(result.letter_states)) {
+                    if (value == "absent") {
+                        continue
+                    }
+
+                    if ("correct" in value) {
+                        value["correct"].forEach(position => correct_letters_positions.add(position))
+                    }
+                }
+
+                for (let position of correct_letters_positions) {
+                    WILDWORD_LETTERS[position].classList.add("potential")
+                }
+            })
+
+            break
     }
 }
 
@@ -179,7 +210,7 @@ function updateWildwordLetters() {
 
                 
 // document.onclick = function() {
-//     browser.storage.sync.get("letter_states", function(result) {
+//     b.storage.sync.get("letter_states", function(result) {
 //         console.log("found in storage:")
 //         console.log(result)
 //         console.log(result.letter_states)

@@ -5,10 +5,21 @@ const CORRECT = "correct"
 const PRESENT = "present"
 const ABSENT = "absent"
 
-document.onchange = function() {
-    let letter_states = getLetterStates()
-    browser.storage.sync.set({letter_states}, () => console.log("stored new 'letter_states'"))
+var b = null
+
+
+if (navigator.userAgent.includes("Chrome")) {
+    b = chrome
+    console.log("Recognized Chrome browser")
+} else if (navigator.userAgent.includes("Firefox")) {
+    b = browser
+    console.log("Recognized Firefox browser")
 }
+
+document.addEventListener('keydown', function(event) {
+    let letter_states = getLetterStates()
+    b.storage.sync.set({letter_states}, () => console.log("stored new 'letter_states'"))
+})
 
 function hasDuplicates(array) {
     return (new Set(array)).size !== array.length;
@@ -37,13 +48,17 @@ function scrapeLetterStates() {
                 case PRESENT:
                     if (letter in letter_states && evaluation in letter_states[letter]) {
                         letter_states[letter][evaluation].push(i)
+                    } else if (letter in letter_states && letter_states[letter] == CORRECT) {
+                        continue
                     } else {
                         letter_states[letter][evaluation] = [i]
                     }
                     break
                 
                 case ABSENT:
-                    letter_states[letter] = evaluation
+                    if (!(letter in letter_states)) {
+                        letter_states[letter] = evaluation
+                    }
                     break
             }
         }
