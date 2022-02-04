@@ -21,7 +21,7 @@ const WILDCARDS = Array.from(document.getElementsByClassName("wildcard"))
 const WILDWORD_LETTERS = Array.from(document.getElementsByClassName("wildword-letter"))
 
 const WILDCARD_ALL = "wildcard-all"
-const WILDCARD_UNKNOWN = "wildcard-unknown"
+const WILDCARD_UNUSED = "wildcard-unused"
 const WILDCARD_PRESENT = "wildcard-present"
 const WILDCARD_CORRECT = "wildcard-correct"
 
@@ -155,7 +155,7 @@ function wildwordLetterClicked(event) {
 
     event.target.classList.remove("potential")
     event.target.classList.remove("all")
-    event.target.classList.remove("unknown")
+    event.target.classList.remove("unused")
     event.target.classList.remove("present")
     event.target.classList.remove("correct")
 
@@ -164,8 +164,8 @@ function wildwordLetterClicked(event) {
             event.target.classList.add("all")
             event.target.children[0].innerText = "*"
             break
-        case WILDCARD_UNKNOWN:
-            event.target.classList.add("unknown")
+        case WILDCARD_UNUSED:
+            event.target.classList.add("unused")
             event.target.children[0].innerText = "?"
             break
         case WILDCARD_PRESENT:
@@ -211,8 +211,8 @@ function updateWildwordLetters() {
                 addPotentialToWildwordLetterIfNot("all")
                 break
                 
-            case WILDCARD_UNKNOWN:
-                addPotentialToWildwordLetterIfNot("unknown")
+            case WILDCARD_UNUSED:
+                addPotentialToWildwordLetterIfNot("unused")
                 break
             
             case WILDCARD_PRESENT:
@@ -319,13 +319,13 @@ function updateFilteredWords() {
         if (wildwordLetter.children[0].innerText == "*") {
             allowed_letters_at_position[position] = new Set(alphabet)
         } else if (wildwordLetter.children[0].innerText == "?") {
-            let unknown_letters = new Set(alphabet)
+            let unused_letters = new Set(alphabet)
             for (let [letter, value] of Object.entries(letterStates)) {
                 if (value != "asbent") {
-                    unknown_letters.delete(letter)
+                    unused_letters.delete(letter)
                 }
             }
-            allowed_letters_at_position[position] = unknown_letters
+            allowed_letters_at_position[position] = unused_letters
         } else {
             let allowed_letters = Array.from(wildwordLetter.children[0].innerText).map(letter => letter.toLowerCase())
             allowed_letters_at_position[position] = new Set(allowed_letters)

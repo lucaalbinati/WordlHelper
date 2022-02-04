@@ -72,7 +72,7 @@ h1 {
     background-color: #787c7e;
 }
 
-.wildcard.unknown {
+.wildcard.unused {
     outline: 0px;
     background-color: #787c7e;
 }
@@ -130,7 +130,7 @@ h1 {
     background-color: #787c7e;
 }
 
-.wildword-letter.unknown {
+.wildword-letter.unused {
     outline: 0px;
     background-color: #787c7e;
 }
