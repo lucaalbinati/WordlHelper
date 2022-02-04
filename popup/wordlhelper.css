@@ -34,7 +34,7 @@ h1 {
     float: right;
 }
 
-/* WILDCARDS */
+/* Wildcards */
 
 .wildcards {
     display: inline-block;
@@ -121,26 +121,18 @@ h1 {
     outline: 2px dashed black;
 }
 
-.wildword-letter.potential {
-    outline: 3px dashed blue;
-}
-
-.wildword-letter.potential:hover {
-    outline: 3px dashed green;
-}
-
-.wildword-letter.full.all {
+.wildword-letter.all {
     outline: 0px;
     font-size: 19px;
     background-color: #787c7e;
 }
 
-.wildword-letter.full.unknown {
+.wildword-letter.unknown {
     outline: 0px;
     background-color: #787c7e;
 }
 
-.wildword-letter.full.present {
+.wildword-letter.present {
     outline: 0px;
     background-color: #c9b458;
 }
@@ -150,7 +142,16 @@ h1 {
     background-color: #6aaa64;
 }
 
+.wildword-letter.potential {
+    outline: 3px dashed blue;
+}
+
+.wildword-letter.potential:hover {
+    outline: 3px dashed green;
+}
+
 .wildword-letter-text {
+    pointer-events: none;
     font-size: 19px;
     text-transform: uppercase;
     text-align: center;

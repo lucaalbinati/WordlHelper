@@ -1,12 +1,10 @@
 
-console.log("in here")
-
 ////////////////////////////////////
 ///////////  Constants  ////////////
 ////////////////////////////////////
 
 const WILDCARDS = Array.from(document.getElementsByClassName("wildcard"))
-const WILDWORD_LETTERS = Array.from(document.getElementById("wildword-letters").children)
+const WILDWORD_LETTERS = Array.from(document.getElementsByClassName("wildword-letter"))
 
 const WILDCARD_ALL = "wildcard-all"
 const WILDCARD_UNKNOWN = "wildcard-unknown"
@@ -66,7 +64,7 @@ function setupWildcardsEventListener() {
 
 function setupDocumentEventListener() {
     document.onclick = function(event) {
-        if (WILDCARDS.all(wildcard => wildcard.id != event.target.id)) {
+        if (WILDCARDS.every(wildcard => wildcard.id != event.target.id)) {
             if (wildcardSelected != null) {
                 wildcardSelected.classList.toggle("selected")
                 wildcardSelected = null
@@ -100,7 +98,7 @@ function loadWordList() {
 //////////////////////////////////////
 
 function wildcardClicked(event) {
-    console.log("wildcard clicked")
+    console.log(`wildcard (id='${event.target.id}') clicked`)
 
     if (wildcardSelected != null) {
         wildcardSelected.classList.toggle("selected")
@@ -111,6 +109,8 @@ function wildcardClicked(event) {
             event.target.classList.toggle("selected")
             wildcardSelected = event.target
         }
+
+        removeWildwordLettersPotential()
     } else {
         event.target.classList.toggle("selected")
         wildcardSelected = event.target
@@ -119,26 +119,77 @@ function wildcardClicked(event) {
     updateWildwordLetters()
 }
 
+function wildwordLetterClicked(event) {
+    console.log(`wildword-letter (id='${event.target.id}') clicked`)
+
+    if (wildcardSelected == null) {
+        console.log("no wildcard is selected")
+        return
+    }
+
+    if (!event.target.classList.contains("potential")) {
+        console.log("can't place wildcard here")
+        return
+    }
+
+    event.target.classList.remove("potential")
+    event.target.classList.remove("all")
+    event.target.classList.remove("unknown")
+    event.target.classList.remove("present")
+    event.target.classList.remove("correct")
+
+    switch (wildcardSelected.id) {
+        case WILDCARD_ALL:
+            event.target.classList.add("all")
+            event.target.children[0].innerText = "*"
+            break
+        case WILDCARD_UNKNOWN:
+            event.target.classList.add("unknown")
+            event.target.children[0].innerText = "?"
+            break
+        case WILDCARD_PRESENT:
+            event.target.classList.add("present")
+            event.target.children[0].innerText = "p"
+            break
+        case WILDCARD_CORRECT:
+            event.target.classList.add("correct")
+            let wildwordLetterPosition = WILDWORD_LETTERS.findIndex(wildwordLetter => wildwordLetter.id == event.target.id)
+            findAndSetCorrectLetterAtPosition(wildwordLetterPosition, event.target.children[0])
+            break
+    }
+
+    wildcardSelected.classList.toggle("selected")
+    wildcardSelected = null
+
+    updateWildwordLetters()
+}
+
+function removeWildwordLettersPotential() {
+    WILDWORD_LETTERS.forEach(wildwordLetter => wildwordLetter.classList.remove("potential"))
+}
+
+function addPotentialToWildwordLetterIfNot(wildwordLetterType) {
+    WILDWORD_LETTERS.forEach(wildwordLetter => {
+        if (!wildwordLetter.classList.contains(wildwordLetterType)) {
+            wildwordLetter.classList.add("potential")
+        }
+    })
+}
+
 function updateWildwordLetters() {
     console.log("updating wildword letters")
 
     if (wildcardSelected == null) {
-        WILDWORD_LETTERS.forEach(wildwordLetter => {
-            if (!wildwordLetter.classList.contains("full")) {
-                wildwordLetter.classList = "wildword-letter empty"
-                wildwordLetter.children[0].innerText = ""
-            } else {
-                console.log(wildwordLetter)
-            }
-        })
+        console.log("no wildcard is selected, so we remove all 'potential'")
+        removeWildwordLettersPotential()
     } else {
         switch (wildcardSelected.id) {
             case WILDCARD_ALL:
+                addPotentialToWildwordLetterIfNot("all")
+                break
+                
             case WILDCARD_UNKNOWN:
-                WILDWORD_LETTERS.forEach(wildwordLetter => {
-                    wildwordLetter.classList.remove("empty")
-                    wildwordLetter.classList.add("potential")
-                })
+                addPotentialToWildwordLetterIfNot("unknown")
                 break
             
             case WILDCARD_PRESENT:
@@ -158,7 +209,9 @@ function updateWildwordLetters() {
                     }
 
                     for (let position of present_letters_positions) {
-                        WILDWORD_LETTERS[position].classList.add("potential")
+                        if (!WILDWORD_LETTERS[position].classList.contains("present")) {
+                            WILDWORD_LETTERS[position].classList.add("potential")
+                        }
                     }
                 })
 
@@ -180,10 +233,10 @@ function updateWildwordLetters() {
                         }
                     }
                     
-                    for (let [letter, position] of Object.entries(letter_at_positions)) {
-                        WILDWORD_LETTERS[position].classList.add("potential")
-                        WILDWORD_LETTERS[position].classList.add("correct")
-                        WILDWORD_LETTERS[position].children[0].innerText = letter
+                    for (let [_, position] of Object.entries(letter_at_positions)) {
+                        if (!WILDWORD_LETTERS[position].classList.contains("correct")) {
+                            WILDWORD_LETTERS[position].classList.add("potential")
+                        }
                     }
                 })
 
@@ -192,79 +245,19 @@ function updateWildwordLetters() {
     }
 }
 
-function wildwordLetterClicked(event) {
-    console.log("wildword-letter clicked")
+function findAndSetCorrectLetterAtPosition(position, element) {
+    b.storage.sync.get("letter_states", function(result) {
+        for (let [letter, value] of Object.entries(result.letter_states)) {
+            if (value == "absent") {
+                continue
+            }
 
-    if (wildcardSelected == null) {
-        console.log("no wildcard is selected")
-        return
-    }
+            if ("correct" in value && value["correct"].includes(position)) {
+                element.innerText = letter
+                return
+            }
+        }
 
-    if (!event.target.classList.contains("potential")) {
-        console.log("can't place wildcard here")
-        return
-    }
-
-    event.target.classList.remove("potential")
-    event.target.classList.add("full")
-
-    switch (wildcardSelected.id) {
-        case WILDCARD_ALL:
-            event.target.classList.add("all")
-            event.target.children[0].innerText = "*"
-            break
-        case WILDCARD_UNKNOWN:
-            event.target.classList.add("unknown")
-            event.target.children[0].innerText = "?"
-            break
-        case WILDCARD_PRESENT:
-            event.target.classList.add("present")
-            event.target.children[0].innerText = "p"
-            break
-        case WILDCARD_CORRECT:
-            event.target.classList.add("correct")
-            event.target.children[0].innerText = "c"
-            break
-    }
-
-    wildcardSelected.classList.toggle("selected")
-    wildcardSelected = null
-
-    updateWildwordLetters()
+        throw new Error(`Couldn't find any correct letter at position ${position} even though there should be one`)
+    })
 }
-
-
-
-                
-// document.onclick = function() {
-//     b.storage.sync.get("letter_states", function(result) {
-//         console.log("found in storage:")
-//         console.log(result)
-//         console.log(result.letter_states)
-//     })
-// }
-                
-// const UNKNOWN_LETTER_COLOR = "#787c7e"
-// const PRESENT_LETTER_COLOR = "#c9b458"
-// const CORRECT_LETTER_COLOR = "#6aaa64"
-
-// function updateWordCard(possible_letters_at_position) {
-//     for (let [position, letters] of Object.entries(possible_letters_at_position)) {
-//         if (letters.length == 1) {
-//             document.getElementById("wildword-box-text-" + position).innerText = letters[0]
-//             document.getElementById("wildword-box-text-" + position).parentElement.style.backgroundColor = CORRECT_LETTER_COLOR
-//             document.getElementById("wildword-box-text-" + position).parentElement.style.outline = "0px"
-//         }
-//     }
-// }
-
-// function updateListWithLetterStates(letter_states) {
-//     let helperOptions = {}
-//     helperOptionNames.forEach(option => helperOptions[option] = document.getElementById(option).checked)
-//     filterWords(letter_states, helperOptions)
-// }
-
-// function filterWords() {
-//     // TODO
-//     return
-// }
