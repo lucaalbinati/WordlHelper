@@ -117,10 +117,6 @@ h1 {
     text-transform: uppercase;
 }
 
-.wildword-letter.empty {
-    outline: 2px dashed black;
-}
-
 .wildword-letter.all {
     outline: 0px;
     font-size: 19px;

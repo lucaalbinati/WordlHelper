@@ -41,6 +41,7 @@ b.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
     if (url.includes("powerlanguage.co.uk/wordle")) {
         document.getElementById("error").hidden = true
         loadWordList()
+        updateFilteredWords()
     } else {
         document.getElementById("helper").hidden = true
     }
@@ -152,7 +153,6 @@ function wildwordLetterClicked(event) {
         return
     }
 
-    event.target.classList.remove("empty")
     event.target.classList.remove("potential")
     event.target.classList.remove("all")
     event.target.classList.remove("unknown")
@@ -316,7 +316,7 @@ function updateFilteredWords() {
     for (let position = 0; position < WILDWORD_LETTERS.length; ++position) {
         let wildwordLetter = WILDWORD_LETTERS[position]
 
-        if (wildwordLetter.classList.contains("empty") || wildwordLetter.children[0].innerText == "*") {
+        if (wildwordLetter.children[0].innerText == "*") {
             allowed_letters_at_position[position] = new Set(alphabet)
         } else if (wildwordLetter.children[0].innerText == "?") {
             let unknown_letters = new Set(alphabet)
