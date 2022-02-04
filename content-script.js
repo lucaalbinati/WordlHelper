@@ -1,12 +1,9 @@
 
-const GET_LETTER_STATES_COMMAND = "getLetterStates"
-
 const CORRECT = "correct"
 const PRESENT = "present"
 const ABSENT = "absent"
 
 var b = null
-
 
 if (navigator.userAgent.includes("Chrome")) {
     b = chrome
@@ -16,12 +13,14 @@ if (navigator.userAgent.includes("Chrome")) {
     console.log("Recognized Firefox browser")
 }
 
-document.addEventListener('onload', function(event) {
-    loadLetterStates()
-})
+document.onload = loadLetterStates()
 
-document.addEventListener('keydown', function(event) {
-    loadLetterStates()
+document.addEventListener('keydown', async function(event) {
+    if (event.code == "Enter") {
+        // wait for animation to finish
+        await new Promise(resolve => setTimeout(resolve, 2000))
+        loadLetterStates()
+    }
 })
 
 function loadLetterStates() {
