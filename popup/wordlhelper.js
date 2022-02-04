@@ -5,7 +5,7 @@ console.log("in here")
 ///////////  Constants  ////////////
 ////////////////////////////////////
 
-const WILDCARDS = Array.from(document.getElementsByClassName("wildcard selectable"))
+const WILDCARDS = Array.from(document.getElementsByClassName("wildcard"))
 const WILDWORD_LETTERS = Array.from(document.getElementById("wildword-letters").children)
 
 const WILDCARD_ALL = "wildcard-all"
@@ -48,7 +48,8 @@ b.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
 
 function setupEventListeners() {
     setupGitHubEventListener()
-    setupWildwordSelectablesEventListener()
+    setupWildcardsEventListener()
+    setupDocumentEventListener()
 }
 
 function setupGitHubEventListener() {
@@ -58,10 +59,21 @@ function setupGitHubEventListener() {
     }
 }
 
-function setupWildwordSelectablesEventListener() {
-    WILDCARDS.forEach(wildcard => {
-        wildcard.onclick = wildcardClicked
-    })    
+function setupWildcardsEventListener() {
+    WILDCARDS.forEach(wildcard => wildcard.onclick = wildcardClicked)
+    WILDWORD_LETTERS.forEach(letter => letter.onclick = wildwordLetterClicked)
+}
+
+function setupDocumentEventListener() {
+    document.onclick = function(event) {
+        if (WILDCARDS.all(wildcard => wildcard.id != event.target.id)) {
+            if (wildcardSelected != null) {
+                wildcardSelected.classList.toggle("selected")
+                wildcardSelected = null
+                updateWildwordLetters()
+            }
+        }
+    }
 }
 
 ////////////////////////////////////
@@ -83,128 +95,143 @@ function loadWordList() {
     })
 }
 
-////////////////////////////////////
-//////  Wildcard Logic & UI  ///////
-////////////////////////////////////
+//////////////////////////////////////
+//  Wildcard & Wildword Logic & UI  //
+//////////////////////////////////////
 
 function wildcardClicked(event) {
-    console.log("clicked")
+    console.log("wildcard clicked")
 
     if (wildcardSelected != null) {
-        wildcardSelected.classList.remove("selected")
-        wildcardSelected.classList.add("selectable")
+        wildcardSelected.classList.toggle("selected")
 
-        if (event.target == wildcardSelected) {
+        if (event.target.id == wildcardSelected.id) {
             wildcardSelected = null
         } else {
-            event.target.classList.add("selected")
-            event.target.classList.remove("selectable")
+            event.target.classList.toggle("selected")
             wildcardSelected = event.target
         }
-
-        removeWildwordLettersPotential()
     } else {
-        event.target.classList.add("selected")
-        event.target.classList.remove("selectable")
+        event.target.classList.toggle("selected")
         wildcardSelected = event.target
     }
 
-    if (wildcardSelected != null) {
-        updateWildwordLetters()
-    }
-}
-
-function removeWildwordLettersPotential() {
-    WILDWORD_LETTERS.forEach(wildwordLetter => {
-        wildwordLetter.classList.remove("potential")
-        console.log(wildwordLetter.classList)
-    })
+    updateWildwordLetters()
 }
 
 function updateWildwordLetters() {
-    switch (wildcardSelected.id) {
-        case WILDCARD_ALL:
-        case WILDCARD_UNKNOWN:
-            WILDWORD_LETTERS.forEach(wildwordLetter => {
-                wildwordLetter.classList.add("potential")
-            })
-            break
-        
-        case WILDCARD_PRESENT:
-            b.storage.sync.get("letter_states", function(result) {
-                console.log(result.letter_states)
+    console.log("updating wildword letters")
 
-                let present_letters_positions = new Set()
+    if (wildcardSelected == null) {
+        WILDWORD_LETTERS.forEach(wildwordLetter => {
+            if (!wildwordLetter.classList.contains("full")) {
+                wildwordLetter.classList = "wildword-letter empty"
+                wildwordLetter.children[0].innerText = ""
+            } else {
+                console.log(wildwordLetter)
+            }
+        })
+    } else {
+        switch (wildcardSelected.id) {
+            case WILDCARD_ALL:
+            case WILDCARD_UNKNOWN:
+                WILDWORD_LETTERS.forEach(wildwordLetter => {
+                    wildwordLetter.classList.remove("empty")
+                    wildwordLetter.classList.add("potential")
+                })
+                break
+            
+            case WILDCARD_PRESENT:
+                b.storage.sync.get("letter_states", function(result) {
+                    console.log(result.letter_states)
 
-                for (let [letter, value] of Object.entries(result.letter_states)) {
-                    if (value == "absent") {
-                        continue
+                    let present_letters_positions = new Set()
+
+                    for (let [letter, value] of Object.entries(result.letter_states)) {
+                        if (value == "absent") {
+                            continue
+                        }
+
+                        if ("present" in value) {
+                            value["present"].forEach(position => present_letters_positions.add(position))
+                        }
                     }
 
-                    if ("present" in value) {
-                        value["present"].forEach(position => present_letters_positions.add(position))
+                    for (let position of present_letters_positions) {
+                        WILDWORD_LETTERS[position].classList.add("potential")
                     }
-                }
+                })
 
-                for (let position of present_letters_positions) {
-                    WILDWORD_LETTERS[position].classList.add("potential")
-                }
-            })
+                break
 
-            break
+            case WILDCARD_CORRECT:
+                b.storage.sync.get("letter_states", function(result) {
+                    console.log(result.letter_states)
 
-        case WILDCARD_CORRECT:
-            b.storage.sync.get("letter_states", function(result) {
-                console.log(result.letter_states)
+                    let letter_at_positions = {}
 
-                let correct_letters_positions = new Set()
+                    for (let [letter, value] of Object.entries(result.letter_states)) {
+                        if (value == "absent") {
+                            continue
+                        }
 
-                for (let [letter, value] of Object.entries(result.letter_states)) {
-                    if (value == "absent") {
-                        continue
+                        if ("correct" in value) {
+                            value["correct"].forEach(position => letter_at_positions[letter] = position)
+                        }
                     }
-
-                    if ("correct" in value) {
-                        value["correct"].forEach(position => correct_letters_positions.add(position))
+                    
+                    for (let [letter, position] of Object.entries(letter_at_positions)) {
+                        WILDWORD_LETTERS[position].classList.add("potential")
+                        WILDWORD_LETTERS[position].classList.add("correct")
+                        WILDWORD_LETTERS[position].children[0].innerText = letter
                     }
-                }
+                })
 
-                for (let position of correct_letters_positions) {
-                    WILDWORD_LETTERS[position].classList.add("potential")
-                }
-            })
-
-            break
+                break
+        }
     }
 }
 
-// function wildcardSelected(event) {
-//     console.log(event.target)
-//     // event.target.checked = true
-//     console.log(event.target.checked)
-//     // event.target.className = event.target.className.replace("selectable", "selected")
+function wildwordLetterClicked(event) {
+    console.log("wildword-letter clicked")
 
-//     switch (event.target.id) {
-//         case WILDCARD_ALL:
-//         case WILDCARD_UNKNOWN:
-//             WILDWORD_LETTERS.forEach(wildwordLetter => {
-//                 wildwordLetter.className += " potential"
-//             })
-//             break
-        
-//         case WILDCARD_PRESENT:
+    if (wildcardSelected == null) {
+        console.log("no wildcard is selected")
+        return
+    }
 
-//             break
+    if (!event.target.classList.contains("potential")) {
+        console.log("can't place wildcard here")
+        return
+    }
 
-//         case WILDCARD_CORRECT:
+    event.target.classList.remove("potential")
+    event.target.classList.add("full")
 
-//             break
-//     }
+    switch (wildcardSelected.id) {
+        case WILDCARD_ALL:
+            event.target.classList.add("all")
+            event.target.children[0].innerText = "*"
+            break
+        case WILDCARD_UNKNOWN:
+            event.target.classList.add("unknown")
+            event.target.children[0].innerText = "?"
+            break
+        case WILDCARD_PRESENT:
+            event.target.classList.add("present")
+            event.target.children[0].innerText = "p"
+            break
+        case WILDCARD_CORRECT:
+            event.target.classList.add("correct")
+            event.target.children[0].innerText = "c"
+            break
+    }
 
-//     // event.target.checked = false
-// }
+    wildcardSelected.classList.toggle("selected")
+    wildcardSelected = null
 
-
+    updateWildwordLetters()
+}
 
 
 

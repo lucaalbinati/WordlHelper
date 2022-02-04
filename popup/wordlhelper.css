@@ -34,6 +34,8 @@ h1 {
     float: right;
 }
 
+/* WILDCARDS */
+
 .wildcards {
     display: inline-block;
     width: 100%;
@@ -43,30 +45,6 @@ h1 {
 .wildcard-container {
     display: flex;
     align-items: center;
-}
-
-.wildcard-description {
-    margin-left: 26px;
-}
-
-.wildword-container {
-    display: inline-block;
-    border-radius: 10px;
-    background-color: #ccc;
-}
-
-.wildcard-label {
-    pointer-events: none;
-}
-
-.wildword-letter-empty {
-    display: block;
-    height: 50px;
-    width: 50px;
-    float: left;
-    margin: 7px;
-    border-radius: 10px;
-    outline: 2px dashed black;
 }
 
 .wildcard {
@@ -81,35 +59,100 @@ h1 {
     outline: 2px dashed black;
 }
 
-.selectable:hover {
-    outline: 2px dashed blue;
-}
-
-.all {
+.wildcard.all {
     outline: 0px;
     font-size: 19px;
     background-color: #787c7e;
 }
 
-.unknown {
+.wildcard.unknown {
     outline: 0px;
     background-color: #787c7e;
 }
 
-.present {
+.wildcard.present {
     outline: 0px;
     background-color: #c9b458;
 }
 
-.correct {
+.wildcard.correct {
     outline: 0px;
     background-color: #6aaa64;
 }
 
-.selected {
+.wildcard:hover {
+    outline: 2px dashed blue;
+}
+
+.wildcard.selected {
     outline: 2px solid blue;
 }
 
-.potential {
+.wildcard-label {
+    pointer-events: none;
+}
+
+.wildcard-description {
+    margin-left: 26px;
+}
+
+/* Wildword & Wildword Letters */
+
+.wildword-container {
+    display: inline-block;
+    border-radius: 10px;
+    background-color: #ccc;
+}
+
+.wildword-letter {
+    display: block;
+    height: 50px;
+    width: 50px;
+    float: left;
+    margin: 7px;
+    border-radius: 10px;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.wildword-letter.empty {
+    outline: 2px dashed black;
+}
+
+.wildword-letter.potential {
+    outline: 3px dashed blue;
+}
+
+.wildword-letter.potential:hover {
     outline: 3px dashed green;
+}
+
+.wildword-letter.full.all {
+    outline: 0px;
+    font-size: 19px;
+    background-color: #787c7e;
+}
+
+.wildword-letter.full.unknown {
+    outline: 0px;
+    background-color: #787c7e;
+}
+
+.wildword-letter.full.present {
+    outline: 0px;
+    background-color: #c9b458;
+}
+
+.wildword-letter.correct {
+    outline: 0px;
+    background-color: #6aaa64;
+}
+
+.wildword-letter-text {
+    font-size: 19px;
+    text-transform: uppercase;
+    text-align: center;
+    color: white;
 }
