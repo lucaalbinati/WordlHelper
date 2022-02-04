@@ -37,10 +37,11 @@ b.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
     var url = tabs[0].url
     
     setupEventListeners()
-
+    
     if (url.includes("powerlanguage.co.uk/wordle")) {
         document.getElementById("error").hidden = true
         loadWordList()
+        updateLetterStates()
         updateFilteredWords()
     } else {
         document.getElementById("helper").hidden = true
@@ -71,7 +72,7 @@ function setupWildcardsEventListener() {
 
 function setupDocumentEventListener() {
     document.onclick = async function(event) {
-        await fetchLetterStates().then(result => letterStates = result)
+        await updateLetterStates()
 
         if (WILDCARDS.every(wildcard => wildcard.id != event.target.id)) {
             if (wildcardSelected != null) {
@@ -84,13 +85,14 @@ function setupDocumentEventListener() {
 }
 
 ////////////////////////////////////
-//////  Fetch Letter States  ///////
+//////  Update Letter States  //////
 ////////////////////////////////////
 
-function fetchLetterStates() {
+function updateLetterStates() {
     return new Promise(resolve => {
         b.storage.sync.get("letter_states", function(result) {
-            resolve(result.letter_states)
+            letterStates = result.letter_states
+            resolve()
         })
     })
 }
@@ -132,9 +134,32 @@ function wildcardClicked(event) {
         }
 
         removeWildwordLettersPotential()
-    } else {
-        event.target.classList.toggle("selected")
-        wildcardSelected = event.target
+    } else { 
+        var nonEmptyPotentialLetters = false
+
+        if (event.target.classList.contains("all")) {
+            nonEmptyPotentialLetters = !WILDWORD_LETTERS.every(wildwordLetter => wildwordLetter.classList.contains("all"))
+        } else if (event.target.classList.contains("unused")) {
+            nonEmptyPotentialLetters = !WILDWORD_LETTERS.every(wildwordLetter => wildwordLetter.classList.contains("unused"))
+        } else if (event.target.classList.contains("present")) {
+            nonEmptyPotentialLetters = Object.values(letterStates).some(letterStateValues => letterStateValues != "absent" && "present" in letterStateValues)
+            for (let val of Object.values(letterStates)) {
+                if (val != "absent" && "present" in val) {
+                    console.log("here")
+                }
+            }
+        } else if (event.target.classList.contains("correct")) {
+            nonEmptyPotentialLetters = Object.values(letterStates).some(letterStateValues => letterStateValues != "absent" && "correct" in letterStateValues)
+        } else {
+            throw new Error("Expected a wildcard with either 'all', 'unused', 'present' or 'correct' in its in classList, but found none")
+        }
+
+        if (nonEmptyPotentialLetters) {
+            event.target.classList.toggle("selected")
+            wildcardSelected = event.target
+        } else {
+            console.log("there are no potential positions for that wildcard")
+        }
     }
 
     updateWildwordLetters()
