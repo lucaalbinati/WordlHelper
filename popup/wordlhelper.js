@@ -1,5 +1,19 @@
 
 ////////////////////////////////////
+/////////  Setup Browser  //////////
+////////////////////////////////////
+
+var b = null
+
+if (navigator.userAgent.includes("Chrome")) {
+    b = chrome
+    console.log("Recognized Chrome browser")
+} else if (navigator.userAgent.includes("Firefox")) {
+    b = browser
+    console.log("Recognized Firefox browser")
+}
+
+////////////////////////////////////
 ///////////  Constants  ////////////
 ////////////////////////////////////
 
@@ -13,19 +27,11 @@ const WILDCARD_CORRECT = "wildcard-correct"
 
 let wildcardSelected = null
 
+var letterStates = null
+
 ////////////////////////////////////
 //////////////  MAIN  //////////////
 ////////////////////////////////////
-
-var b = null
-
-if (navigator.userAgent.includes("Chrome")) {
-    b = chrome
-    console.log("Recognized Chrome browser")
-} else if (navigator.userAgent.includes("Firefox")) {
-    b = browser
-    console.log("Recognized Firefox browser")
-}
 
 b.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
     var url = tabs[0].url
@@ -63,7 +69,9 @@ function setupWildcardsEventListener() {
 }
 
 function setupDocumentEventListener() {
-    document.onclick = function(event) {
+    document.onclick = async function(event) {
+        await fetchLetterStates().then(result => letterStates = result)
+
         if (WILDCARDS.every(wildcard => wildcard.id != event.target.id)) {
             if (wildcardSelected != null) {
                 wildcardSelected.classList.toggle("selected")
@@ -72,6 +80,18 @@ function setupDocumentEventListener() {
             }
         }
     }
+}
+
+////////////////////////////////////
+//////  Fetch Letter States  ///////
+////////////////////////////////////
+
+function fetchLetterStates() {
+    return new Promise(resolve => {
+        b.storage.sync.get("letter_states", function(result) {
+            resolve(result.letter_states)
+        })
+    })
 }
 
 ////////////////////////////////////
@@ -132,6 +152,7 @@ function wildwordLetterClicked(event) {
         return
     }
 
+    event.target.classList.remove("empty")
     event.target.classList.remove("potential")
     event.target.classList.remove("all")
     event.target.classList.remove("unknown")
@@ -163,6 +184,7 @@ function wildwordLetterClicked(event) {
     wildcardSelected = null
 
     updateWildwordLetters()
+    updateFilteredWords()
 }
 
 function removeWildwordLettersPotential() {
@@ -249,43 +271,81 @@ function updateWildwordLetters() {
 }
 
 function findAndSetPresentLettersAtPosition(position, element) {
-    b.storage.sync.get("letter_states", function(result) {
-        var present_letters = new Set()
+    var present_letters = new Set()
 
-        for (let [letter, value] of Object.entries(result.letter_states)) {
-            if (value == "absent") {
-                continue
-            }
-
-            if ("present" in value && !value["present"].includes(position)) {
-                present_letters.add(letter)
-            }
+    for (let [letter, value] of Object.entries(letterStates)) {
+        if (value == "absent") {
+            continue
         }
 
-        present_letters = Array.from(present_letters)
-        console.log(present_letters)
-
-        if (present_letters.length == 0) {
-            throw new Error(`Couldn't find any present letter at position ${position} even though there should be one (at least)`)
+        if ("present" in value && !value["present"].includes(position)) {
+            present_letters.add(letter)
         }
-        
-        element.innerText = present_letters.join("")
-    })
+    }
+
+    present_letters = Array.from(present_letters)
+
+    if (present_letters.length == 0) {
+        throw new Error(`Couldn't find any present letter at position ${position} even though there should be one (at least)`)
+    }
+    
+    element.innerText = present_letters.join("")
 }
 
 function findAndSetCorrectLetterAtPosition(position, element) {
-    b.storage.sync.get("letter_states", function(result) {
-        for (let [letter, value] of Object.entries(result.letter_states)) {
-            if (value == "absent") {
-                continue
-            }
-
-            if ("correct" in value && value["correct"].includes(position)) {
-                element.innerText = letter
-                return
-            }
+    for (let [letter, value] of Object.entries(letterStates)) {
+        if (value == "absent") {
+            continue
         }
 
-        throw new Error(`Couldn't find any correct letter at position ${position} even though there should be one`)
+        if ("correct" in value && value["correct"].includes(position)) {
+            element.innerText = letter
+            return
+        }
+    }
+
+    throw new Error(`Couldn't find any correct letter at position ${position} even though there should be one`)
+}
+
+function updateFilteredWords() {
+    console.log("filtering words")
+
+    let alphabet = Array.from("abcdefghijklmnopqrstuvwxyz")
+
+    let allowed_letters_at_position = {}
+    for (let position = 0; position < WILDWORD_LETTERS.length; ++position) {
+        let wildwordLetter = WILDWORD_LETTERS[position]
+
+        if (wildwordLetter.classList.contains("empty") || wildwordLetter.children[0].innerText == "*") {
+            allowed_letters_at_position[position] = new Set(alphabet)
+        } else if (wildwordLetter.children[0].innerText == "?") {
+            let unknown_letters = new Set(alphabet)
+            for (let [letter, value] of Object.entries(letterStates)) {
+                if (value != "asbent") {
+                    unknown_letters.delete(letter)
+                }
+            }
+            allowed_letters_at_position[position] = unknown_letters
+        } else {
+            let allowed_letters = Array.from(wildwordLetter.children[0].innerText).map(letter => letter.toLowerCase())
+            allowed_letters_at_position[position] = new Set(allowed_letters)
+        }
+    }
+
+    b.storage.local.get("wordList", function(result) {
+        if (result.wordList == null) {
+            throw new Error("'wordList' should be present and loaded, but couldn't find it")
+        }
+
+        let filteredWords = result.wordList.filter(word => {
+            for (let position = 0; position < word.length; ++position) {
+                if (!allowed_letters_at_position[position].has(word[position])) {
+                    return false
+                }
+            }
+            return true
+        })
+
+        document.getElementById("possible-words-list").innerText = filteredWords.join("\n")
     })
 }
