@@ -16,10 +16,18 @@ if (navigator.userAgent.includes("Chrome")) {
     console.log("Recognized Firefox browser")
 }
 
+document.addEventListener('onload', function(event) {
+    loadLetterStates()
+})
+
 document.addEventListener('keydown', function(event) {
+    loadLetterStates()
+})
+
+function loadLetterStates() {
     let letter_states = getLetterStates()
     b.storage.sync.set({letter_states}, () => console.log("stored new 'letter_states'"))
-})
+}
 
 function hasDuplicates(array) {
     return (new Set(array)).size !== array.length;

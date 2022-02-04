@@ -149,11 +149,12 @@ function wildwordLetterClicked(event) {
             break
         case WILDCARD_PRESENT:
             event.target.classList.add("present")
-            event.target.children[0].innerText = "p"
+            var wildwordLetterPosition = WILDWORD_LETTERS.findIndex(wildwordLetter => wildwordLetter.id == event.target.id)
+            findAndSetPresentLettersAtPosition(wildwordLetterPosition, event.target.children[0])
             break
         case WILDCARD_CORRECT:
             event.target.classList.add("correct")
-            let wildwordLetterPosition = WILDWORD_LETTERS.findIndex(wildwordLetter => wildwordLetter.id == event.target.id)
+            var wildwordLetterPosition = WILDWORD_LETTERS.findIndex(wildwordLetter => wildwordLetter.id == event.target.id)
             findAndSetCorrectLetterAtPosition(wildwordLetterPosition, event.target.children[0])
             break
     }
@@ -198,13 +199,15 @@ function updateWildwordLetters() {
 
                     let present_letters_positions = new Set()
 
-                    for (let [letter, value] of Object.entries(result.letter_states)) {
+                    for (let [_, value] of Object.entries(result.letter_states)) {
                         if (value == "absent") {
                             continue
                         }
 
                         if ("present" in value) {
-                            value["present"].forEach(position => present_letters_positions.add(position))
+                            value["present"].forEach(position => {
+                                [0, 1, 2, 3, 4].filter(p => p != position).forEach(pos => present_letters_positions.add(pos))
+                            })
                         }
                     }
 
@@ -221,19 +224,19 @@ function updateWildwordLetters() {
                 b.storage.sync.get("letter_states", function(result) {
                     console.log(result.letter_states)
 
-                    let letter_at_positions = {}
+                    let correct_letters_positions = new Set()
 
-                    for (let [letter, value] of Object.entries(result.letter_states)) {
+                    for (let [_, value] of Object.entries(result.letter_states)) {
                         if (value == "absent") {
                             continue
                         }
 
                         if ("correct" in value) {
-                            value["correct"].forEach(position => letter_at_positions[letter] = position)
+                            value["correct"].forEach(position => correct_letters_positions.add(position))
                         }
                     }
                     
-                    for (let [_, position] of Object.entries(letter_at_positions)) {
+                    for (let position of correct_letters_positions) {
                         if (!WILDWORD_LETTERS[position].classList.contains("correct")) {
                             WILDWORD_LETTERS[position].classList.add("potential")
                         }
@@ -243,6 +246,31 @@ function updateWildwordLetters() {
                 break
         }
     }
+}
+
+function findAndSetPresentLettersAtPosition(position, element) {
+    b.storage.sync.get("letter_states", function(result) {
+        var present_letters = new Set()
+
+        for (let [letter, value] of Object.entries(result.letter_states)) {
+            if (value == "absent") {
+                continue
+            }
+
+            if ("present" in value && !value["present"].includes(position)) {
+                present_letters.add(letter)
+            }
+        }
+
+        present_letters = Array.from(present_letters)
+        console.log(present_letters)
+
+        if (present_letters.length == 0) {
+            throw new Error(`Couldn't find any present letter at position ${position} even though there should be one (at least)`)
+        }
+        
+        element.innerText = present_letters.join("")
+    })
 }
 
 function findAndSetCorrectLetterAtPosition(position, element) {
