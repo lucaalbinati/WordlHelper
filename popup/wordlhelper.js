@@ -59,9 +59,7 @@ function setupWildcardsEventListener() {
 }
 
 function setupDocumentEventListener() {
-    document.onclick = async function(event) {
-        await updateLetterStates()
-
+    document.onclick = function(event) {
         if (WILDCARDS.every(wildcard => wildcard.id != event.target.id)) {
             if (wildcardSelected != null) {
                 wildcardSelected.classList.toggle("selected")
@@ -79,6 +77,7 @@ function setupDocumentEventListener() {
 function updateLetterStates() {
     return new Promise(resolve => {
         browser.storage.sync.get("letter_states", function(result) {
+            console.log("updated 'letterStates'")
             letterStates = result.letter_states
             resolve()
         })
@@ -108,8 +107,10 @@ function loadWordList() {
 //  Wildcard & Wildword Logic & UI  //
 //////////////////////////////////////
 
-function wildcardClicked(event) {
+async function wildcardClicked(event) {
     console.log(`wildcard (id='${event.target.id}') clicked`)
+
+    await updateLetterStates()
 
     if (wildcardSelected != null) {
         wildcardSelected.classList.toggle("selected")
@@ -229,54 +230,46 @@ function updateWildwordLetters() {
                 break
             
             case WILDCARD_PRESENT:
-                browser.storage.sync.get("letter_states", function(result) {
-                    console.log(result.letter_states)
+                let present_letters_positions = new Set()
 
-                    let present_letters_positions = new Set()
-
-                    for (let [_, value] of Object.entries(result.letter_states)) {
-                        if (value == "absent") {
-                            continue
-                        }
-
-                        if ("present" in value) {
-                            value["present"].forEach(position => {
-                                [0, 1, 2, 3, 4].filter(p => p != position).forEach(pos => present_letters_positions.add(pos))
-                            })
-                        }
+                for (let [_, value] of Object.entries(letterStates)) {
+                    if (value == "absent") {
+                        continue
                     }
 
-                    for (let position of present_letters_positions) {
-                        if (!WILDWORD_LETTERS[position].classList.contains("present")) {
-                            WILDWORD_LETTERS[position].classList.add("potential")
-                        }
+                    if ("present" in value) {
+                        value["present"].forEach(position => {
+                            [0, 1, 2, 3, 4].filter(p => p != position).forEach(pos => present_letters_positions.add(pos))
+                        })
                     }
-                })
+                }
+
+                for (let position of present_letters_positions) {
+                    if (!WILDWORD_LETTERS[position].classList.contains("present")) {
+                        WILDWORD_LETTERS[position].classList.add("potential")
+                    }
+                }
 
                 break
 
             case WILDCARD_CORRECT:
-                browser.storage.sync.get("letter_states", function(result) {
-                    console.log(result.letter_states)
+                let correct_letters_positions = new Set()
 
-                    let correct_letters_positions = new Set()
-
-                    for (let [_, value] of Object.entries(result.letter_states)) {
-                        if (value == "absent") {
-                            continue
-                        }
-
-                        if ("correct" in value) {
-                            value["correct"].forEach(position => correct_letters_positions.add(position))
-                        }
+                for (let [_, value] of Object.entries(letterStates)) {
+                    if (value == "absent") {
+                        continue
                     }
-                    
-                    for (let position of correct_letters_positions) {
-                        if (!WILDWORD_LETTERS[position].classList.contains("correct")) {
-                            WILDWORD_LETTERS[position].classList.add("potential")
-                        }
+
+                    if ("correct" in value) {
+                        value["correct"].forEach(position => correct_letters_positions.add(position))
                     }
-                })
+                }
+                
+                for (let position of correct_letters_positions) {
+                    if (!WILDWORD_LETTERS[position].classList.contains("correct")) {
+                        WILDWORD_LETTERS[position].classList.add("potential")
+                    }
+                }
 
                 break
         }
