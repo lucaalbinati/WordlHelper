@@ -1,19 +1,5 @@
 
 ////////////////////////////////////
-/////////  Setup Browser  //////////
-////////////////////////////////////
-
-var b = null
-
-if (navigator.userAgent.includes("Chrome")) {
-    b = chrome
-    console.log("Recognized Chrome browser")
-} else if (navigator.userAgent.includes("Firefox")) {
-    b = browser
-    console.log("Recognized Firefox browser")
-}
-
-////////////////////////////////////
 ///////////  Constants  ////////////
 ////////////////////////////////////
 
@@ -33,7 +19,7 @@ var letterStates = null
 //////////////  MAIN  //////////////
 ////////////////////////////////////
 
-b.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
+browser.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
     var url = tabs[0].url
     
     setupEventListeners()
@@ -90,7 +76,7 @@ function setupDocumentEventListener() {
 
 function updateLetterStates() {
     return new Promise(resolve => {
-        b.storage.sync.get("letter_states", function(result) {
+        browser.storage.sync.get("letter_states", function(result) {
             letterStates = result.letter_states
             resolve()
         })
@@ -102,13 +88,13 @@ function updateLetterStates() {
 ////////////////////////////////////
 
 function loadWordList() {
-    b.storage.local.get("wordList", function(result) {
+    browser.storage.local.get("wordList", function(result) {
         if (result.wordList == null) {
             let textUrl = "https://raw.githubusercontent.com/dwyl/english-words/master/words_alpha.txt"
 
             fetch(textUrl).then(r => r.text()).then(t => {
                 let wordList = t.split("\r\n").filter(w => w.length == 5)
-                b.storage.local.set({wordList}, () => console.log("loaded and stored 'wordList'"))
+                browser.storage.local.set({wordList}, () => console.log("loaded and stored 'wordList'"))
             })
         } else {
             console.log("'wordList' has already been loaded")
@@ -241,7 +227,7 @@ function updateWildwordLetters() {
                 break
             
             case WILDCARD_PRESENT:
-                b.storage.sync.get("letter_states", function(result) {
+                browser.storage.sync.get("letter_states", function(result) {
                     console.log(result.letter_states)
 
                     let present_letters_positions = new Set()
@@ -268,7 +254,7 @@ function updateWildwordLetters() {
                 break
 
             case WILDCARD_CORRECT:
-                b.storage.sync.get("letter_states", function(result) {
+                browser.storage.sync.get("letter_states", function(result) {
                     console.log(result.letter_states)
 
                     let correct_letters_positions = new Set()
@@ -357,7 +343,7 @@ function updateFilteredWords() {
         }
     }
 
-    b.storage.local.get("wordList", function(result) {
+    browser.storage.local.get("wordList", function(result) {
         if (result.wordList == null) {
             throw new Error("'wordList' should be present and loaded, but couldn't find it")
         }

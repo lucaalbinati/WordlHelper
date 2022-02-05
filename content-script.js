@@ -3,16 +3,6 @@ const CORRECT = "correct"
 const PRESENT = "present"
 const ABSENT = "absent"
 
-var b = null
-
-if (navigator.userAgent.includes("Chrome")) {
-    b = chrome
-    console.log("Recognized Chrome browser")
-} else if (navigator.userAgent.includes("Firefox")) {
-    b = browser
-    console.log("Recognized Firefox browser")
-}
-
 document.onload = loadLetterStates()
 
 document.addEventListener('keydown', async function(event) {
@@ -25,7 +15,7 @@ document.addEventListener('keydown', async function(event) {
 
 function loadLetterStates() {
     let letter_states = getLetterStates()
-    b.storage.sync.set({letter_states}, () => console.log("stored new 'letter_states'"))
+    browser.storage.sync.set({letter_states}, () => console.log("stored new 'letter_states'"))
 }
 
 function hasDuplicates(array) {
