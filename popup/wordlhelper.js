@@ -3,6 +3,8 @@
 ///////////  Constants  ////////////
 ////////////////////////////////////
 
+const WORDLE_URL = "https://www.powerlanguage.co.uk/wordle"
+
 const WILDCARDS = Array.from(document.getElementsByClassName("wildcard"))
 const WILDWORD_LETTERS = Array.from(document.getElementsByClassName("wildword-letter"))
 
@@ -24,7 +26,7 @@ browser.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) 
     
     setupEventListeners()
     
-    if (url.includes("powerlanguage.co.uk/wordle")) {
+    if (url.includes(WORDLE_URL)) {
         document.getElementById("error").hidden = true
         loadWordList()
         updateLetterStates()
