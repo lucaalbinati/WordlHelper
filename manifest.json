@@ -5,11 +5,17 @@
     "description": "Solving Wordle has never been easier!",
     
     "icons": {
-        "48": "images/icon-48.png"
+        "16": "images/icon-16.png",
+        "32": "images/icon-32.png",
+        "48": "images/icon-48.png",
+        "64": "images/icon-64.png",
+        "128": "images/icon-128.png",
+        "256": "images/icon-256.png",
+        "512": "images/icon-512.png"
     },
 
     "browser_action": {
-        "default_icon": "images/icon-48.png",
+        "default_icon": "images/icon-64.png",
         "default_title": "WordlHelper",
         "default_popup": "popup/wordlhelper.html"
     },
