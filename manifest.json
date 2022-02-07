@@ -22,7 +22,7 @@
 
     "content_scripts": [
         {
-          "matches": ["https://www.powerlanguage.co.uk/wordle/"],
+          "matches": ["https://*.powerlanguage.co.uk/wordle/"],
           "js": ["content-script.js"]
         }
     ],

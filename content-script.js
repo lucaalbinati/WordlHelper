@@ -15,7 +15,7 @@ document.addEventListener('keydown', async function(event) {
 
 function loadLetterStates() {
     let letter_states = getLetterStates()
-    browser.storage.sync.set({letter_states}, () => console.log("stored new 'letter_states'"))
+    chrome.storage.sync.set({letter_states}, () => console.log("stored new 'letter_states'"))
 }
 
 function hasDuplicates(array) {

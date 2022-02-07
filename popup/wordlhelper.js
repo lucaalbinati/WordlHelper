@@ -3,7 +3,7 @@
 ///////////  Constants  ////////////
 ////////////////////////////////////
 
-const WORDLE_URL = "https://www.powerlanguage.co.uk/wordle"
+const WORDLE_URL = "powerlanguage.co.uk/wordle"
 const GITHUB_PROJECT_URL = "https://github.com/lucaalbinati/WordlHelper"
 const WORD_LIST_URL = "https://raw.githubusercontent.com/dwyl/english-words/master/words_alpha.txt"
 
@@ -23,11 +23,11 @@ var letterStates = null
 //////////////  MAIN  //////////////
 ////////////////////////////////////
 
-browser.tabs.query({'active': true, 'lastFocusedWindow': true}, async function (tabs) {
+chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, async function (tabs) {
     var url = tabs[0].url
     
     setupEventListeners()
-    
+
     if (url.includes(WORDLE_URL)) {
         document.getElementById("error").hidden = true
         await loadWordList()
@@ -78,7 +78,7 @@ function setupDocumentEventListener() {
 
 function updateLetterStates() {
     return new Promise(resolve => {
-        browser.storage.sync.get("letter_states", function(result) {
+        chrome.storage.sync.get("letter_states", function(result) {
             console.log("updated 'letterStates'")
             letterStates = result.letter_states
             resolve()
@@ -92,13 +92,13 @@ function updateLetterStates() {
 
 function loadWordList() {
     return new Promise(resolve => {
-        browser.storage.local.get("wordList", function(result) {
+        chrome.storage.local.get("wordList", function(result) {
             if (result.wordList == null) {
                 let textUrl = WORD_LIST_URL
 
                 fetch(textUrl).then(r => r.text()).then(t => {
                     let wordList = t.split("\r\n").filter(w => w.length == 5)
-                    browser.storage.local.set({wordList}, () => {
+                    chrome.storage.local.set({wordList}, () => {
                         console.log("loaded and stored 'wordList'")
                         resolve()
                     })
@@ -140,11 +140,6 @@ async function wildcardClicked(event) {
             nonEmptyPotentialLetters = !WILDWORD_LETTERS.every(wildwordLetter => wildwordLetter.classList.contains("unused"))
         } else if (event.target.classList.contains("present")) {
             nonEmptyPotentialLetters = Object.values(letterStates).some(letterStateValues => letterStateValues != "absent" && "present" in letterStateValues)
-            for (let val of Object.values(letterStates)) {
-                if (val != "absent" && "present" in val) {
-                    console.log("here")
-                }
-            }
         } else if (event.target.classList.contains("correct")) {
             nonEmptyPotentialLetters = Object.values(letterStates).some(letterStateValues => letterStateValues != "absent" && "correct" in letterStateValues)
         } else {
@@ -346,7 +341,7 @@ function updateFilteredWords() {
         }
     }
 
-    browser.storage.local.get("wordList", function(result) {
+    chrome.storage.local.get("wordList", function(result) {
         if (result.wordList == null) {
             throw new Error("'wordList' should be present and loaded, but couldn't find it")
         }
