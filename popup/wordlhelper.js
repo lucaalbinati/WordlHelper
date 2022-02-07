@@ -78,7 +78,7 @@ function setupDocumentEventListener() {
 
 function updateLetterStates() {
     return new Promise(resolve => {
-        chrome.storage.sync.get("letter_states", function(result) {
+        chrome.storage.local.get("letter_states", function(result) {
             console.log("updated 'letterStates'")
             letterStates = result.letter_states
             resolve()
