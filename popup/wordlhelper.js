@@ -23,15 +23,15 @@ var letterStates = null
 //////////////  MAIN  //////////////
 ////////////////////////////////////
 
-browser.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
+browser.tabs.query({'active': true, 'lastFocusedWindow': true}, async function (tabs) {
     var url = tabs[0].url
     
     setupEventListeners()
     
     if (url.includes(WORDLE_URL)) {
         document.getElementById("error").hidden = true
-        loadWordList()
-        updateLetterStates()
+        await loadWordList()
+        await updateLetterStates()
         updateFilteredWords()
     } else {
         document.getElementById("helper").hidden = true
@@ -91,17 +91,23 @@ function updateLetterStates() {
 ////////////////////////////////////
 
 function loadWordList() {
-    browser.storage.local.get("wordList", function(result) {
-        if (result.wordList == null) {
-            let textUrl = WORD_LIST_URL
+    return new Promise(resolve => {
+        browser.storage.local.get("wordList", function(result) {
+            if (result.wordList == null) {
+                let textUrl = WORD_LIST_URL
 
-            fetch(textUrl).then(r => r.text()).then(t => {
-                let wordList = t.split("\r\n").filter(w => w.length == 5)
-                browser.storage.local.set({wordList}, () => console.log("loaded and stored 'wordList'"))
-            })
-        } else {
-            console.log("'wordList' has already been loaded")
-        }
+                fetch(textUrl).then(r => r.text()).then(t => {
+                    let wordList = t.split("\r\n").filter(w => w.length == 5)
+                    browser.storage.local.set({wordList}, () => {
+                        console.log("loaded and stored 'wordList'")
+                        resolve()
+                    })
+                })
+            } else {
+                console.log("'wordList' has already been loaded")
+                resolve()
+            }
+        })
     })
 }
 
