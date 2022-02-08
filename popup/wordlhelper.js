@@ -30,10 +30,7 @@ chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, async function (t
 
     if (url.includes(WORDLE_URL)) {
         document.getElementById("error").hidden = true
-        // TODO wait for promises together, not one after the other
-        await loadWordList()
-        await updateLetterStates()
-        await loadWildword()
+        await Promise.all([loadWordList(), updateLetterStates(), loadWildword()])
         updateFilteredWords()
     } else {
         document.getElementById("helper").hidden = true
