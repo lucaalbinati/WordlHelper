@@ -400,6 +400,10 @@ function updateFilteredWords() {
         }
 
         let filteredWords = result.wordList.filter(word => {
+            if (word.length != 5) {
+                return false
+            }
+
             for (let position = 0; position < word.length; ++position) {
                 if (!allowed_letters_at_position[position].has(word[position])) {
                     return false
@@ -408,7 +412,11 @@ function updateFilteredWords() {
             return true
         })
 
-        document.getElementById("possible-words-title").innerText = `${filteredWords.length} possible words`
+        if (filteredWords.length > 0) {
+            document.getElementById("possible-words-title").innerText = `${filteredWords.length} words match these wildcards`
+        } else {
+            document.getElementById("possible-words-title").innerText = "No words match these wildcards"
+        }
         document.getElementById("possible-words-list").innerText = filteredWords.join("\n")
     })
 }
