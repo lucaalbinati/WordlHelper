@@ -30,8 +30,10 @@ chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, async function (t
 
     if (url.includes(WORDLE_URL)) {
         document.getElementById("error").hidden = true
+        // TODO wait for promises together, not one after the other
         await loadWordList()
         await updateLetterStates()
+        await loadWildword()
         updateFilteredWords()
     } else {
         document.getElementById("helper").hidden = true
@@ -46,6 +48,7 @@ function setupEventListeners() {
     setupGitHubEventListener()
     setupWildcardsEventListener()
     setupDocumentEventListener()
+    setupResetWildwordEventListener()
 }
 
 function setupGitHubEventListener() {
@@ -69,6 +72,17 @@ function setupDocumentEventListener() {
                 updateWildwordLetters()
             }
         }
+    }
+}
+
+function setupResetWildwordEventListener() {
+    document.getElementById("trashcan-button").onclick = function() {
+        WILDWORD_LETTERS.forEach(wildwordLetter => {
+            wildwordLetter.classList = "wildword-letter all"
+            wildwordLetter.children[0].innerText = "*"
+        })
+        saveWildword()
+        updateFilteredWords()
     }
 }
 
@@ -107,6 +121,47 @@ function loadWordList() {
                 console.log("'wordList' has already been loaded")
                 resolve()
             }
+        })
+    })
+}
+
+////////////////////////////////////
+////////  Wildword Storage  ////////
+////////////////////////////////////
+
+function saveWildword() {
+    return new Promise(resolve => {
+        let wildword = {}
+
+        for (let i = 0; i < WILDWORD_LETTERS.length; ++i) {
+            wildword[i] = {
+                "classListValues": Array.from(WILDWORD_LETTERS[i].classList.values()).join(" "),
+                "letter": WILDWORD_LETTERS[i].children[0].innerText
+            }
+        }
+
+        chrome.storage.local.set({wildword}, () => {
+            console.log("saved wildword state to storage")
+            resolve()
+        })
+    })
+}
+
+function loadWildword() {
+    return new Promise(resolve => {
+        chrome.storage.local.get("wildword", function(result) {
+            if (result.wildword != null) {
+                for (let [position, data] of Object.entries(result.wildword)) {
+                    WILDWORD_LETTERS[position].classList = ""
+                    data["classListValues"].split(" ").forEach(cls => WILDWORD_LETTERS[position].classList.add(cls))
+                    WILDWORD_LETTERS[position].children[0].innerText = data["letter"]
+                }
+                console.log("loading wildword state from storage")
+            } else {
+                console.log("did not find wildword state in storage")
+            }
+
+            resolve()
         })
     })
 }
@@ -201,6 +256,7 @@ function wildwordLetterClicked(event) {
     wildcardSelected = null
 
     updateWildwordLetters()
+    saveWildword()
     updateFilteredWords()
 }
 

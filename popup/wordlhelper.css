@@ -27,7 +27,6 @@ h1 {
 }
 
 .inner-helper {
-    width: 320px;
     margin-bottom: 40px;
 }
 
@@ -41,6 +40,11 @@ h1 {
     padding-left: 16px;
 }
 
+.trashcan {
+    float: right;
+    margin-left: 16px;
+}
+
 /* Wildcards */
 
 .wildcards {
@@ -50,9 +54,13 @@ h1 {
     padding-left: 16px;
 }
 
-.wildcard-container {
+.wildword-outer-container {
     display: flex;
     align-items: center;
+}
+
+.wildcard-container {
+    display: flex;
 }
 
 .wildcard {
