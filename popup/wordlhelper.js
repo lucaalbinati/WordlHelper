@@ -5,7 +5,7 @@
 
 const WORDLE_URL = "powerlanguage.co.uk/wordle"
 const GITHUB_PROJECT_URL = "https://github.com/lucaalbinati/WordlHelper"
-const WORD_LIST_URL = "https://raw.githubusercontent.com/dwyl/english-words/master/words_alpha.txt"
+const WORD_LIST_URL = "https://raw.githubusercontent.com/lucaalbinati/WordlHelper/main/words-sorted-by-frequency.txt"
 
 const WILDCARDS = Array.from(document.getElementsByClassName("wildcard"))
 const WILDWORD_LETTERS = Array.from(document.getElementsByClassName("wildword-letter"))
@@ -97,7 +97,7 @@ function loadWordList() {
                 let textUrl = WORD_LIST_URL
 
                 fetch(textUrl).then(r => r.text()).then(t => {
-                    let wordList = t.split("\r\n").filter(w => w.length == 5)
+                    let wordList = t.split("\n")
                     chrome.storage.local.set({wordList}, () => {
                         console.log("loaded and stored 'wordList'")
                         resolve()
