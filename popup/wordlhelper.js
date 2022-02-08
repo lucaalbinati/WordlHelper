@@ -355,6 +355,7 @@ function updateFilteredWords() {
             return true
         })
 
+        document.getElementById("possible-words-title").innerText = `${filteredWords.length} possible words`
         document.getElementById("possible-words-list").innerText = filteredWords.join("\n")
     })
 }
