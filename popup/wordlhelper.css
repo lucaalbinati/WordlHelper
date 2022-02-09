@@ -10,19 +10,32 @@ html, body {
     margin-right: 26px;
 }
 
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgb(156, 155, 155);
+    padding: 6px;
+}
+
+.title {
+    display: block;
+    font-family: 'Helvetica Neue';
+    font-size: 34px;
+    font-weight: bold;
+    text-align: center;
+    text-transform: uppercase;
+    margin: 0px;
+}
+
+.title-icon {
+    width: 26px;
+    display: block;
+}
+
 .information {
     text-align: right;
 }
-
-h1 {
-    font-family: 'Helvetica Neue';
-    font-size: 36px;
-    text-align: center;
-    text-transform: uppercase;
-    margin: 10px;
-    margin-bottom: 14px;
-}
-
 
 .error {
     padding: 10px;
