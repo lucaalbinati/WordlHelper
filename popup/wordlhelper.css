@@ -5,6 +5,7 @@ html, body {
 }
 
 .container {
+    width: 390px;
     margin: 16px;
     margin-right: 26px;
 }
@@ -20,6 +21,11 @@ h1 {
     text-transform: uppercase;
     margin: 10px;
     margin-bottom: 14px;
+}
+
+
+.error {
+    padding: 10px;
 }
 
 .helper {

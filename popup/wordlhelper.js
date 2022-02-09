@@ -27,7 +27,7 @@ chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, async function (t
     var url = tabs[0].url
     
     setupEventListeners()
-
+    
     if (url.includes(WORDLE_URL)) {
         document.getElementById("error").hidden = true
         await Promise.all([loadWordList(), updateLetterStates(), loadWildword()])

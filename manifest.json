@@ -29,7 +29,7 @@
       
 
     "permissions": [
-        "tabs",
+        "activeTab",
         "storage"
     ]    
 }
