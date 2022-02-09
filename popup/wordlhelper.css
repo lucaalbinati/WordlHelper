@@ -24,7 +24,7 @@ html, body {
 }
 
 .container {
-    width: 390px;
+    width: fit-content;
     padding: 16px;
 }
 
@@ -39,7 +39,7 @@ header {
 .title {
     display: block;
     font-family: 'Helvetica Neue';
-    font-size: 34px;
+    font-size: 28px;
     font-weight: bold;
     text-align: center;
     text-transform: uppercase;
@@ -69,11 +69,20 @@ header {
 }
 
 .helper {
-    padding: 10px;
+    padding: 4px;
+    padding-top: 20px;
 }
 
 .inner-helper {
-    margin-bottom: 40px;
+    display: grid;
+}
+
+.inner-helper-title {
+    padding: 8px;
+    margin: 0px;
+    font-size: 18px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;
 }
 
 .option {
@@ -86,33 +95,22 @@ header {
     padding-left: 16px;
 }
 
-.trashcan {
-    float: right;
-    margin-left: 16px;
-}
-
 /* Wildcards */
 
 .wildcards {
     display: inline-block;
-    width: 100%;
-    padding-bottom: 30px;
-    padding-left: 16px;
-}
-
-.wildword-outer-container {
-    display: flex;
-    align-items: center;
+    padding: 16px;
 }
 
 .wildcard-container {
     display: flex;
+    align-items: center;
+    padding: 5px;
 }
 
 .wildcard {
     height: 50px;
     width: 50px;
-    margin: 5px;
     border-radius: 10px;
     text-align: center;
     text-transform: uppercase;
@@ -152,16 +150,33 @@ header {
 
 .wildcard-label {
     pointer-events: none;
+    font-size: 19px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: normal;
+    text-align: center;
+    position: relative;
+    top: 50%;
+    left: 50%;
+    -ms-transform: translateX(-50%) translateY(-50%);
+    -webkit-transform: translate(-50%,-50%);
+    transform: translate(-50%,-50%);
 }
 
 .wildcard-description {
     margin-left: 26px;
+    font-size: 15px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: normal;
 }
 
 /* Wildword & Wildword Letters */
 
 .wildword-container {
-    display: inline-block;
+    display: flex;
+    align-items: center;
+    justify-self: center;
+    position: relative;
+    margin: 10px;
     border-radius: 10px;
     background-color: var(--wildword-background-color);
 }
@@ -208,10 +223,34 @@ header {
     outline: 3px dashed var(--wildword-letter-selected-color);
 }
 
+.wildword-letter-label {
+    pointer-events: none;
+    font-size: 19px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: normal;
+    text-align: center;
+    position: relative;
+    top: 50%;
+    left: 50%;
+    -ms-transform: translateX(-50%) translateY(-50%);
+    -webkit-transform: translate(-50%,-50%);
+    transform: translate(-50%,-50%);
+}
+
 .wildword-letter-text {
     pointer-events: none;
     font-size: 19px;
     text-transform: uppercase;
     text-align: center;
     color: var(--tile-text-color);
+}
+
+.trashcan-icon {
+    display: block;
+    height: 22px;
+    width: 22px;
+    padding: 4px;
+    margin: 7px;
+    margin-right: 14px;
+    border-radius: 32%;
 }

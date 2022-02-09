@@ -10,7 +10,7 @@
         <header>
             <div class="title-icon"></div>
             <div class="title">WordlHelper</div>
-            <div class="title-icon">
+            <div>
                 <input type="image" id="github-image" class="title-icon" src="github-icon-512.png">
             </div>
         </header>
@@ -22,21 +22,19 @@
 
         <div id="helper" class="helper">
             <div class="inner-helper">
-                <h3>Specify word using wildcards</h3>
+                <div class="inner-helper-title">Specify word using wildcards</div>
                 
                 <div class="wildcards">
                     <div class="wildcard-container">
                         <div id="wildcard-all" class="wildcard all">
-                            <p class="wildcard-label">*</p>
+                            <div class="wildcard-label">✽</div>
                         </div>
-                        <div class="wildcard-description">
-                            <p>Any letter</p>
-                        </div>
+                        <div class="wildcard-description">Any letter</div>
                     </div>
 
                     <div class="wildcard-container">
                         <div id="wildcard-unused" class="wildcard unused">
-                            <p class="wildcard-label">?</p>
+                            <div class="wildcard-label">?</div>
                         </div>
                         <div class="wildcard-description">
                             <p>Unused letter</p>
@@ -45,7 +43,7 @@
 
                     <div class="wildcard-container">
                         <div id="wildcard-present" class="wildcard present">
-                            <p class="wildcard-label"></p>
+                            <div class="wildcard-label"></div>
                         </div>
                         <div class="wildcard-description">
                             <p>Present letter</p>
@@ -54,7 +52,7 @@
 
                     <div class="wildcard-container">
                         <div id="wildcard-correct" class="wildcard correct">
-                            <p class="wildcard-label"></p>
+                            <div class="wildcard-label"></div>
                         </div>
                         <div class="wildcard-description">
                             <p>Correct letter</p>
@@ -62,33 +60,29 @@
                     </div>
                 </div>
 
-                <div class="wildword-outer-container">
-                    <div id="wildword-letters" class="wildword-container">
-                        <div id="wildword-letter-0" class="wildword-letter all">
-                            <p class="wildword-letter-text">*</p>
-                        </div>
-                        <div id="wildword-letter-1" class="wildword-letter all">
-                            <p class="wildword-letter-text">*</p>
-                        </div>
-                        <div id="wildword-letter-2" class="wildword-letter all">
-                            <p class="wildword-letter-text">*</p>
-                        </div>
-                        <div id="wildword-letter-3" class="wildword-letter all">
-                            <p class="wildword-letter-text">*</p>
-                        </div>
-                        <div id="wildword-letter-4" class="wildword-letter all">
-                            <p class="wildword-letter-text">*</p>
-                        </div>
+                <div id="wildword-letters" class="wildword-container">
+                    <div id="wildword-letter-0" class="wildword-letter all">
+                        <div class="wildword-letter-label">✽</div>
                     </div>
-
-                    <div class="trashcan">
-                        <input type="image" id="trashcan-button" src="trashcan-icon.png" height="32px">
+                    <div id="wildword-letter-1" class="wildword-letter all">
+                        <div class="wildword-letter-label">✽</div>
                     </div>
+                    <div id="wildword-letter-2" class="wildword-letter all">
+                        <div class="wildword-letter-label">✽</div>
+                    </div>
+                    <div id="wildword-letter-3" class="wildword-letter all">
+                        <div class="wildword-letter-label">✽</div>
+                    </div>
+                    <div id="wildword-letter-4" class="wildword-letter all">
+                        <div class="wildword-letter-label">✽</div>
+                    </div>
+                    
+                    <input type="image" id="trashcan-button" class="trashcan-icon" src="trashcan-icon.png">
                 </div>
             </div>
 
             <div class="inner-helper">
-                <h3 id="possible-words-title"></h3>
+                <div id="possible-words-title" class="inner-helper-title"></div>
                 <div id="possible-words-list" class="possible-words"></div>
             </div>
         </div>

@@ -15,6 +15,9 @@ const WILDCARD_UNUSED = "wildcard-unused"
 const WILDCARD_PRESENT = "wildcard-present"
 const WILDCARD_CORRECT = "wildcard-correct"
 
+const WILDLETTER_ALL = "✽"
+const WILDLETTER_UNUSED = "?"
+
 let wildcardSelected = null
 
 var letterStates = null
@@ -25,8 +28,10 @@ var letterStates = null
 
 chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, async function (tabs) {
     var url = tabs[0].url
-    
+
     setupEventListeners()
+
+    // TODO upon first download, show 'loading word list' UI maybe
     
     if (url.includes(WORDLE_URL)) {
         document.getElementById("error").hidden = true
@@ -76,7 +81,7 @@ function setupResetWildwordEventListener() {
     document.getElementById("trashcan-button").onclick = function() {
         WILDWORD_LETTERS.forEach(wildwordLetter => {
             wildwordLetter.classList = "wildword-letter all"
-            wildwordLetter.children[0].innerText = "*"
+            wildwordLetter.children[0].innerText = WILDLETTER_ALL
         })
         saveWildword()
         updateFilteredWords()
@@ -231,11 +236,11 @@ function wildwordLetterClicked(event) {
     switch (wildcardSelected.id) {
         case WILDCARD_ALL:
             event.target.classList.add("all")
-            event.target.children[0].innerText = "*"
+            event.target.children[0].innerText = WILDLETTER_ALL
             break
         case WILDCARD_UNUSED:
             event.target.classList.add("unused")
-            event.target.children[0].innerText = "?"
+            event.target.children[0].innerText = WILDLETTER_UNUSED
             break
         case WILDCARD_PRESENT:
             event.target.classList.add("present")
@@ -378,9 +383,9 @@ function updateFilteredWords() {
     for (let position = 0; position < WILDWORD_LETTERS.length; ++position) {
         let wildwordLetter = WILDWORD_LETTERS[position]
 
-        if (wildwordLetter.children[0].innerText == "*") {
+        if (wildwordLetter.children[0].innerText == WILDLETTER_ALL) {
             allowed_letters_at_position[position] = new Set(alphabet)
-        } else if (wildwordLetter.children[0].innerText == "?") {
+        } else if (wildwordLetter.children[0].innerText == WILDLETTER_UNUSED) {
             let unused_letters = new Set(alphabet)
             for (let [letter, value] of Object.entries(letterStates)) {
                 if (value != "asbent") {
