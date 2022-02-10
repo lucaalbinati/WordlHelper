@@ -35,7 +35,8 @@ chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, async function (t
     
     if (url.includes(WORDLE_URL)) {
         document.getElementById("error").hidden = true
-        await Promise.all([loadWordList(), updateLetterStates(), loadWildword()])
+        await Promise.all([loadWordList(), updateLetterStates()])
+        await loadWildword()
         updateFilteredWords()
     } else {
         document.getElementById("helper").hidden = true
@@ -152,13 +153,16 @@ function saveWildword() {
 function loadWildword() {
     return new Promise(resolve => {
         chrome.storage.local.get("wildword", function(result) {
-            if (result.wildword != null) {
+            if (result.wildword != null && Object.entries(letterStates).length > 0) {
                 for (let [position, data] of Object.entries(result.wildword)) {
                     WILDWORD_LETTERS[position].classList = ""
                     data["classListValues"].split(" ").forEach(cls => WILDWORD_LETTERS[position].classList.add(cls))
                     WILDWORD_LETTERS[position].children[0].innerText = data["letter"]
                 }
                 console.log("loading wildword state from storage")
+            } else if (result.wildword != null && Object.entries(letterStates).length == 0) {
+                let wildword = {}
+                chrome.storage.local.set({wildword}, () => console.log("reset wildword in storage"))
             } else {
                 console.log("did not find wildword state in storage")
             }
