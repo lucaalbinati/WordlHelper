@@ -26,6 +26,8 @@ var letterStates = null
 //////////////  MAIN  //////////////
 ////////////////////////////////////
 
+// TODO when opening the popup, get updateLetterStates
+
 chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, async function (tabs) {
     var url = tabs[0].url
 
