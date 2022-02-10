@@ -69,12 +69,14 @@ header {
 }
 
 .helper {
-    padding: 4px;
-    padding-top: 20px;
+    padding: 0px;
+    margin: 0px;
 }
 
 .inner-helper {
     display: grid;
+    padding: 4px;
+    padding-top: 20px;
 }
 
 .inner-helper-title {
