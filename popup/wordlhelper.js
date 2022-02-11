@@ -3,7 +3,8 @@
 ///////////  Constants  ////////////
 ////////////////////////////////////
 
-const WORDLE_URL = "powerlanguage.co.uk/wordle"
+const GET_LETTER_STATES_HEADER = "getLetterStates"
+
 const GITHUB_PROJECT_URL = "https://github.com/lucaalbinati/WordlHelper"
 const WORD_LIST_URL = "https://raw.githubusercontent.com/lucaalbinati/WordlHelper/main/words-sorted-by-frequency.txt"
 
@@ -26,23 +27,26 @@ var letterStates = null
 //////////////  MAIN  //////////////
 ////////////////////////////////////
 
-// TODO when opening the popup, get updateLetterStates
+setupEventListeners()
 
-chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, async function (tabs) {
-    var url = tabs[0].url
+chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+    console.log(`sending message with header '${GET_LETTER_STATES_HEADER}' to tab id '${tabs[0].id}'`)
 
-    setupEventListeners()
+    chrome.tabs.sendMessage(tabs[0].id, {header: GET_LETTER_STATES_HEADER}, async function(response) {
+        if (chrome.runtime.lastError) {
+            console.log(`an error occurred, probably because the content script is not injected (because the current tab is not Wordle); proceeding with error message load up`)
+            document.getElementById("helper").hidden = true
+            return
+        }
 
-    // TODO upon first download, show 'loading word list' UI maybe
-    
-    if (url.includes(WORDLE_URL)) {
+        console.log(`received positive response for '${GET_LETTER_STATES_HEADER}' message, proceeding with popup load up`)
+        letterStates = response.letterStates
+
         document.getElementById("error").hidden = true
-        await Promise.all([loadWordList(), updateLetterStates()])
+        await loadWordList()
         await loadWildword()
         updateFilteredWords()
-    } else {
-        document.getElementById("helper").hidden = true
-    }
+    })
 })
 
 ////////////////////////////////////
@@ -89,20 +93,6 @@ function setupResetWildwordEventListener() {
         saveWildword()
         updateFilteredWords()
     }
-}
-
-////////////////////////////////////
-//////  Update Letter States  //////
-////////////////////////////////////
-
-function updateLetterStates() {
-    return new Promise(resolve => {
-        chrome.storage.local.get("letter_states", function(result) {
-            console.log("updated 'letterStates'")
-            letterStates = result.letter_states
-            resolve()
-        })
-    })
 }
 
 ////////////////////////////////////
@@ -178,10 +168,8 @@ function loadWildword() {
 //  Wildcard & Wildword Logic & UI  //
 //////////////////////////////////////
 
-async function wildcardClicked(event) {
+function wildcardClicked(event) {
     console.log(`wildcard (id='${event.target.id}') clicked`)
-
-    await updateLetterStates()
 
     if (wildcardSelected != null) {
         wildcardSelected.classList.toggle("selected")
@@ -297,6 +285,7 @@ function updateWildwordLetters() {
                 break
             
             case WILDCARD_PRESENT:
+                // TODO remove from potential positions, the positions we know are CORRECT
                 let present_letters_positions = new Set()
 
                 for (let [_, value] of Object.entries(letterStates)) {

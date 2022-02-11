@@ -1,22 +1,35 @@
 
+////////////////////////////////////
+///////////  Constants  ////////////
+////////////////////////////////////
+
+const GET_LETTER_STATES_HEADER = "getLetterStates"
+
 const CORRECT = "correct"
 const PRESENT = "present"
 const ABSENT = "absent"
 
-document.onload = loadLetterStates()
+////////////////////////////////////
+//////////////  MAIN  //////////////
+////////////////////////////////////
 
-document.addEventListener('keydown', async function(event) {
-    if (event.code == "Enter") {
-        // wait for animation to finish
-        await new Promise(resolve => setTimeout(resolve, 2000))
-        loadLetterStates()
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    switch (request.header) {
+        case GET_LETTER_STATES_HEADER:
+            console.log(`received a '${GET_LETTER_STATES_HEADER}' message from '${sender.id}'`)
+            let letter_states = getLetterStates()
+            console.log(`fetched 'letter_states' and sending the answer back to '${sender.id}'`)
+            sendResponse({letterStates: letter_states})
+            break
+            
+        default:
+            console.log(`received a message from '${sender.id}' with unknown header '${request.header}'`)
     }
 })
 
-function loadLetterStates() {
-    let letter_states = getLetterStates()
-    chrome.storage.local.set({letter_states}, () => console.log("stored new 'letter_states'"))
-}
+////////////////////////////////////
+///////  Fetch Letter States  //////
+////////////////////////////////////
 
 function hasDuplicates(array) {
     return (new Set(array)).size !== array.length;
