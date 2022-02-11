@@ -103,9 +103,7 @@ function loadWordList() {
     return new Promise(resolve => {
         chrome.storage.local.get("wordList", function(result) {
             if (result.wordList == null) {
-                let textUrl = WORD_LIST_URL
-
-                fetch(textUrl).then(r => r.text()).then(t => {
+                fetch(WORD_LIST_URL).then(r => r.text()).then(t => {
                     let wordList = t.split("\n")
                     chrome.storage.local.set({wordList}, () => {
                         console.log("loaded and stored 'wordList'")
