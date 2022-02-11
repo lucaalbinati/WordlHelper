@@ -24,7 +24,7 @@ function hasDuplicates(array) {
 
 function scrapeLetterStates() {
     let letter_states = {}
-    let wordRows = document.getElementsByTagName("game-app")[0].shadowRoot.children[1].children[0].children[1].children[0].children
+    let wordRows = document.getElementsByTagName("game-app")[0].shadowRoot.children[1].children[1].children[0].children[0].children
 
     for (let wordRow of wordRows) {
         if (wordRow.getAttribute("letters") == "") {
