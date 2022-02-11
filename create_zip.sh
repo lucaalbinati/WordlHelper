@@ -20,8 +20,10 @@ if [[ $# -eq 0 ]]; then
 elif [[ $# -eq 1 ]]; then
     if [[ "$1" == "--chrome" ]]; then
         sed -i '' 's/"manifest_version": 2/"manifest_version": 3/g' manifest.json
+        sed -i '' 's/"browser_action":/"action":/g' manifest.json
         zip_source "_Chrome"
         sed -i '' 's/"manifest_version": 3/"manifest_version": 2/g' manifest.json
+        sed -i '' 's/"action":/"browser_action":/g' manifest.json
     else
         echo "Unknown argument: $1"
     fi 

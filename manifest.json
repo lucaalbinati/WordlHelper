@@ -22,14 +22,10 @@
 
     "content_scripts": [
         {
-            "matches": [
-                "https://www.nytimes.com/games/wordle/index.html",
-                "https://nytimes.com/games/wordle/index.html"
-            ],
+            "matches": ["https://*.nytimes.com/games/wordle/index.html"],
             "js": ["content.js"]
         }
     ],
-      
 
     "permissions": [
         "storage"
