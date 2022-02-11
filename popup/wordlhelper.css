@@ -53,15 +53,11 @@ header {
 }
 
 .information {
-    text-align: right;
-}
-
-.error {
     padding: 6px;
     padding-top: 15px;
 }
 
-.error-message {
+.information-message {
     margin: 7px;
     padding: 0px;
     font-size: 16px;

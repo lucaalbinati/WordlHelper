@@ -33,17 +33,21 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
     console.log(`sending message with header '${GET_LETTER_STATES_HEADER}' to tab id '${tabs[0].id}'`)
 
     chrome.tabs.sendMessage(tabs[0].id, {header: GET_LETTER_STATES_HEADER}, async function(response) {
-        if (chrome.runtime.lastError) {
+        document.getElementById("error").hidden = true
+        document.getElementById("helper").hidden = true
+        await loadWordList()
+        document.getElementById("loading").hidden = true
+
+        if (chrome.runtime.lastError || typeof response == 'undefined') {
             console.log(`an error occurred, probably because the content script is not injected (because the current tab is not Wordle); proceeding with error message load up`)
-            document.getElementById("helper").hidden = true
+            document.getElementById("error").hidden = false
             return
         }
 
         console.log(`received positive response for '${GET_LETTER_STATES_HEADER}' message, proceeding with popup load up`)
         letterStates = response.letterStates
 
-        document.getElementById("error").hidden = true
-        await loadWordList()
+        document.getElementById("helper").hidden = false
         await loadWildword()
         updateFilteredWords()
     })
