@@ -118,36 +118,31 @@ header {
     text-transform: uppercase;
     color: var(--tile-text-color);
     font-family: Arial, Helvetica, sans-serif;
-    outline: 2px dashed black;
 }
 
 .wildcard.all {
-    outline: 0px;
     font-size: 19px;
     background-color: var(--tile-color);
 }
 
 .wildcard.unused {
-    outline: 0px;
     background-color: var(--tile-color);
 }
 
 .wildcard.present {
-    outline: 0px;
     background-color: var(--present-color);
 }
 
 .wildcard.correct {
-    outline: 0px;
     background-color: var(--correct-color);
 }
 
 .wildcard:hover {
-    outline: 2px dashed var(--tile-hover-color);
+    box-shadow: 0 0 3pt 2pt var(--tile-hover-color);
 }
 
 .wildcard.selected {
-    outline: 2px solid var(--tile-selected-color);
+    box-shadow: 0 0 0pt 2pt var(--tile-selected-color);;
 }
 
 .wildcard-label {
@@ -197,32 +192,28 @@ header {
 }
 
 .wildword-letter.all {
-    outline: 0px;
     font-size: 19px;
     background-color: var(--tile-color);
 }
 
 .wildword-letter.unused {
-    outline: 0px;
     background-color: var(--tile-color);
 }
 
 .wildword-letter.present {
-    outline: 0px;
     background-color: var(--present-color);
 }
 
 .wildword-letter.correct {
-    outline: 0px;
     background-color: var(--correct-color);
 }
 
 .wildword-letter.potential {
-    outline: 3px dashed var(--wildword-letter-potential-color);
+    box-shadow: 0 0 2pt 1pt var(--wildword-letter-potential-color);
 }
 
 .wildword-letter.potential:hover {
-    outline: 3px dashed var(--wildword-letter-selected-color);
+    box-shadow: 0 0 3pt 2pt var(--wildword-letter-selected-color);
 }
 
 .wildword-letter-label {
