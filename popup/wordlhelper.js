@@ -16,7 +16,6 @@ const WILDWORD_LETTERS = Array.from(document.getElementsByClassName("wildword-le
 
 const WILDCARD_ALL = "wildcard-all"
 const WILDCARD_UNUSED = "wildcard-unused"
-const WILDCARD_PRESENT = "wildcard-present"
 const WILDCARD_CORRECT = "wildcard-correct"
 
 const WILDLETTER_ALL = "✽"
@@ -129,13 +128,22 @@ function loadWordList() {
 //  Wildcards & Wildword Storage  //
 ////////////////////////////////////
 
-// TODO store data of last storage, to know when to force reload (new day = new word)
+function isOutdated(lastModified) {
+    var todayDay = new Date()
+    todayDay.setHours(0, 0, 0, 0)
+    var lastModifiedDay = new Date(lastModified)
+    lastModifiedDay.setHours(0, 0, 0, 0)
+    return todayDay.toUTCString() != lastModifiedDay.toUTCString()
+}
 
 function saveWildword() {
-    let wildword = {}
+    let wildword = {
+        positions: {},
+        lastModified: new Date().toUTCString()
+    }
 
     for (let i = 0; i < WILDWORD_LETTERS.length; ++i) {
-        wildword[i] = {
+        wildword["positions"][i] = {
             "classListValues": Array.from(WILDWORD_LETTERS[i].classList.values()).join(" "),
             "letter": WILDWORD_LETTERS[i].children[0].innerText
         }
@@ -152,14 +160,14 @@ function saveWildword() {
 function loadWildword() {
     return new Promise(resolve => {
         chrome.storage.local.get("wildword", function(result) {
-            if (result.wildword != null && Object.entries(letterStates).length > 0) {
-                for (let [position, data] of Object.entries(result.wildword)) {
+            if (result.wildword != null && Object.entries(letterStates).length > 0 && !isOutdated(result.wildword.lastModified)) {
+                for (let [position, data] of Object.entries(result.wildword.positions)) {
                     WILDWORD_LETTERS[position].classList = ""
                     data["classListValues"].split(" ").forEach(cls => WILDWORD_LETTERS[position].classList.add(cls))
                     WILDWORD_LETTERS[position].children[0].innerText = data["letter"]
                 }
                 console.log("loading wildword state from storage")
-            } else if (result.wildword != null && Object.entries(letterStates).length == 0) {
+            } else if (result.wildword != null && (Object.entries(letterStates).length == 0 || isOutdated(result.wildword.lastModified))) {
                 let wildword = {}
                 chrome.storage.local.set({wildword}, () => console.log("reset wildword in storage"))
             } else {
@@ -177,15 +185,18 @@ function savePresentWildcardToggleState(event) {
 
     return new Promise(resolve => {
         chrome.storage.local.get("presentLetters", function(result) {
-            var presentLetters = {}
+            let presentLetters = {
+                letters: {},
+                lastModified: new Date().toUTCString()
+            }
 
             if (result.presentLetters != null) {
                 console.log(`found 'presentLetters' in storage`)
-                result.presentLetters[letter] = value
-                presentLetters = result.presentLetters
+                result.presentLetters.letters[letter] = value
+                presentLetters.letters = result.presentLetters.letters
             } else {
                 console.log(`did not find 'presentLetters' in storage, creating it`)
-                presentLetters[letter] = value
+                presentLetters.letters[letter] = value
             }
             
             chrome.storage.local.set({presentLetters}, () => {
@@ -199,9 +210,9 @@ function savePresentWildcardToggleState(event) {
 async function loadPresentWildcardToggleState(letter) {
     return new Promise(resolve => {
         chrome.storage.local.get("presentLetters", function(result) {
-            if (result.presentLetters != null && letter in result.presentLetters) {
-                console.log(`found toggle switch value for '${letter}': '${result.presentLetters[letter]}'`)
-                resolve(result.presentLetters[letter])
+            if (result.presentLetters != null && !isOutdated(result.presentLetters.lastModified) && letter in result.presentLetters.letters) {
+                console.log(`found toggle switch value for '${letter}': '${result.presentLetters.letters[letter]}'`)
+                resolve(result.presentLetters.letters[letter])
             } else {
                 console.log(`did not find toggle switch value for '${letter}'`)
                 resolve(false)
@@ -432,7 +443,6 @@ function getAllowedLettersAtPosition() {
         let checked = presentWildcard.children[1].children[0].checked
         if (checked) {
             let presentLetter = presentWildcard.children[0].children[0].innerText.toLowerCase()
-            console.log(`checked for ${presentLetter}`)
             for (let [letter, value] of Object.entries(letterStates)) {
                 if (value == "asbent") {
                     continue
