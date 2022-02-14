@@ -259,8 +259,10 @@ async function addPresentWildcardsToUI() {
             presentWildcardContainer.appendChild(wildcardContainerElement)
             
             presentWildcardToggleSwitchElement.onclick = function(event) {
-                savePresentWildcardToggleState(event)
-                updateFilteredWords()
+                if (typeof event.target.checked != 'undefined') {
+                    savePresentWildcardToggleState(event)
+                    updateFilteredWords()
+                }
             }
         }
     }
