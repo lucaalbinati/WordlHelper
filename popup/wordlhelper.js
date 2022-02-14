@@ -126,20 +126,22 @@ function loadWordList() {
 }
 
 ////////////////////////////////////
-////////  Wildword Storage  ////////
+//  Wildcards & Wildword Storage  //
 ////////////////////////////////////
 
+// TODO store data of last storage, to know when to force reload (new day = new word)
+
 function saveWildword() {
-    return new Promise(resolve => {
-        let wildword = {}
+    let wildword = {}
 
-        for (let i = 0; i < WILDWORD_LETTERS.length; ++i) {
-            wildword[i] = {
-                "classListValues": Array.from(WILDWORD_LETTERS[i].classList.values()).join(" "),
-                "letter": WILDWORD_LETTERS[i].children[0].innerText
-            }
+    for (let i = 0; i < WILDWORD_LETTERS.length; ++i) {
+        wildword[i] = {
+            "classListValues": Array.from(WILDWORD_LETTERS[i].classList.values()).join(" "),
+            "letter": WILDWORD_LETTERS[i].children[0].innerText
         }
-
+    }
+    
+    return new Promise(resolve => {
         chrome.storage.local.set({wildword}, () => {
             console.log("saved wildword state to storage")
             resolve()
@@ -169,11 +171,50 @@ function loadWildword() {
     })
 }
 
+function savePresentWildcardToggleState(event) {
+    let letter = event.target.parentNode.parentNode.children[0].children[0].innerText.toLowerCase()
+    let value = event.target.checked
+
+    return new Promise(resolve => {
+        chrome.storage.local.get("presentLetters", function(result) {
+            var presentLetters = {}
+
+            if (result.presentLetters != null) {
+                console.log(`found 'presentLetters' in storage`)
+                result.presentLetters[letter] = value
+                presentLetters = result.presentLetters
+            } else {
+                console.log(`did not find 'presentLetters' in storage, creating it`)
+                presentLetters[letter] = value
+            }
+            
+            chrome.storage.local.set({presentLetters}, () => {
+                console.log(`stored toggle switch value of '${letter}' to '${value}'`)
+                resolve()
+            })
+        })
+    })
+}
+
+async function loadPresentWildcardToggleState(letter) {
+    return new Promise(resolve => {
+        chrome.storage.local.get("presentLetters", function(result) {
+            if (result.presentLetters != null && letter in result.presentLetters) {
+                console.log(`found toggle switch value for '${letter}': '${result.presentLetters[letter]}'`)
+                resolve(result.presentLetters[letter])
+            } else {
+                console.log(`did not find toggle switch value for '${letter}'`)
+                resolve(false)
+            }
+        })
+    })
+}
+
 //////////////////////////////////////
 //  Wildcard & Wildword Logic & UI  //
 //////////////////////////////////////
 
-function addPresentWildcardsToUI() {
+async function addPresentWildcardsToUI() {
     let presentWildcardContainer = document.getElementsByClassName("present-wildcard-container")[0]
 
     for (let [letter, value] of Object.entries(letterStates)) {
@@ -194,7 +235,10 @@ function addPresentWildcardsToUI() {
             
             let template = document.createElement("template")
             template.innerHTML = '<label class="switch"><input type="checkbox"><span class="slider round"></span></label>'.trim()
-            let presentWildcardToggleSwitchElement = template.content.firstChild            
+            let presentWildcardToggleSwitchElement = template.content.firstChild    
+            await loadPresentWildcardToggleState(letter).then(value => {
+                presentWildcardToggleSwitchElement.children[0].checked = value
+            })
             
             presentWildcardLabelElement.appendChild(label)
             presentWildcardDivElement.appendChild(presentWildcardLabelElement)
@@ -202,9 +246,9 @@ function addPresentWildcardsToUI() {
             wildcardContainerElement.appendChild(presentWildcardToggleSwitchElement)
 
             presentWildcardContainer.appendChild(wildcardContainerElement)
-
+            
             presentWildcardToggleSwitchElement.onclick = function(event) {
-                // saveToggleStates() TODO
+                savePresentWildcardToggleState(event)
                 updateFilteredWords()
             }
         }
