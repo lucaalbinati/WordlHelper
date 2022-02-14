@@ -11,6 +11,7 @@ function zip_source() {
 
     zip -d $ZIP_FILENAME "__MACOSX*" > /dev/null
     zip -d $ZIP_FILENAME "*.DS_Store" > /dev/null
+    zip -d $ZIP_FILENAME "*.sh" > /dev/null
 
     echo "Created '$ZIP_FILENAME'"
 }

@@ -14,20 +14,30 @@ const WILDCARDS = Array.from(document.getElementsByClassName("wildcard"))
 const PRESENT_WILDCARDS = () => document.getElementsByClassName("present-wildcard-container")[0].children
 const WILDWORD_LETTERS = Array.from(document.getElementsByClassName("wildword-letter"))
 
-const WILDCARD_ALL = "wildcard-all"
-const WILDCARD_UNUSED = "wildcard-unused"
-const WILDCARD_CORRECT = "wildcard-correct"
+const WILDCARD_ID_ALL = "wildcard-all"
+const WILDCARD_ID_UNUSED = "wildcard-unused"
+const WILDCARD_ID_CORRECT = "wildcard-correct"
 
 const WILDLETTER_ALL = "✽"
 const WILDLETTER_UNUSED = "?"
 
-let wildcardSelected = null
+const CORRECT = "correct"
+const PRESENT = "present"
+const ABSENT = "absent"
 
-var letterStates = null
+const CORRECT_CLASS = "correct"
+const PRESENT_CLASS = "present"
+const UNUSED_CLASS = "unused"
+const POTENTIAL_CLASS = "potential"
+const SELECTED_CLASS = "selected"
+const ALL_CLASS = "all"
 
 ////////////////////////////////////
 //////////////  MAIN  //////////////
 ////////////////////////////////////
+
+let wildcardSelected = null
+var letterStates = null
 
 setupEventListeners()
 
@@ -82,7 +92,7 @@ function setupDocumentEventListener() {
     document.onclick = function(event) {
         if (WILDCARDS.every(wildcard => wildcard.id != event.target.id)) {
             if (wildcardSelected != null) {
-                wildcardSelected.classList.toggle("selected")
+                wildcardSelected.classList.toggle(SELECTED_CLASS)
                 wildcardSelected = null
                 updateWildwordLetters()
             }
@@ -93,7 +103,7 @@ function setupDocumentEventListener() {
 function setupResetWildwordEventListener() {
     document.getElementById("trashcan-button").onclick = function() {
         WILDWORD_LETTERS.forEach(wildwordLetter => {
-            wildwordLetter.classList = "wildword-letter all"
+            wildwordLetter.classList = `wildword-letter ${ALL_CLASS}`
             wildwordLetter.children[0].innerText = WILDLETTER_ALL
         })
         saveWildword()
@@ -229,35 +239,49 @@ async function addPresentWildcardsToUI() {
     let presentWildcardContainer = document.getElementsByClassName("present-wildcard-container")[0]
 
     for (let [letter, value] of Object.entries(letterStates)) {
-        if (value == "absent") {
+        if (value == ABSENT) {
             continue
         }
 
-        if ("present" in value) {
+        if (PRESENT in value) {
+            // load switch value (if present in storage)
+            let checkedValue = await loadPresentWildcardToggleState(letter).then(value => {
+                return value
+            })
+
+            // overall wildcard container element
             let wildcardContainerElement = document.createElement("div")
             wildcardContainerElement.classList = "wildcard-container"
 
+            presentWildcardContainer.appendChild(wildcardContainerElement)
+
+            // wildcard letter "icon"
             let presentWildcardDivElement = document.createElement("div")
-            presentWildcardDivElement.classList = "wildcard present"
+            presentWildcardDivElement.classList = `wildcard ${PRESENT_CLASS}`
 
             let presentWildcardLabelElement = document.createElement("div")
             presentWildcardLabelElement.classList = "wildcard-label"
             let label = document.createTextNode(letter)
-            
-            let template = document.createElement("template")
-            template.innerHTML = '<label class="switch"><input type="checkbox"><span class="slider round"></span></label>'.trim()
-            let presentWildcardToggleSwitchElement = template.content.firstChild    
-            await loadPresentWildcardToggleState(letter).then(value => {
-                presentWildcardToggleSwitchElement.children[0].checked = value
-            })
-            
+
             presentWildcardLabelElement.appendChild(label)
             presentWildcardDivElement.appendChild(presentWildcardLabelElement)
             wildcardContainerElement.appendChild(presentWildcardDivElement)
+            
+            // wildcard toggle switch
+            let presentWildcardToggleSwitchElement = document.createElement("label")
+            presentWildcardToggleSwitchElement.classList = "switch"
+
+            let input = document.createElement("input")
+            input.type = "checkbox"
+            input.checked = checkedValue
+
+            let span = document.createElement("span")
+            span.classList = "slider round"
+
+            presentWildcardToggleSwitchElement.appendChild(input)
+            presentWildcardToggleSwitchElement.appendChild(span)
             wildcardContainerElement.appendChild(presentWildcardToggleSwitchElement)
 
-            presentWildcardContainer.appendChild(wildcardContainerElement)
-            
             presentWildcardToggleSwitchElement.onclick = function(event) {
                 if (typeof event.target.checked != 'undefined') {
                     savePresentWildcardToggleState(event)
@@ -272,12 +296,12 @@ function wildcardClicked(event) {
     console.log(`wildcard (id='${event.target.id}') clicked`)
 
     if (wildcardSelected != null) {
-        wildcardSelected.classList.toggle("selected")
+        wildcardSelected.classList.toggle(SELECTED_CLASS)
 
         if (event.target.id == wildcardSelected.id) {
             wildcardSelected = null
         } else {
-            event.target.classList.toggle("selected")
+            event.target.classList.toggle(SELECTED_CLASS)
             wildcardSelected = event.target
         }
 
@@ -285,20 +309,20 @@ function wildcardClicked(event) {
     } else { 
         var nonEmptyPotentialLetters = false
 
-        if (event.target.classList.contains("all")) {
-            nonEmptyPotentialLetters = !WILDWORD_LETTERS.every(wildwordLetter => wildwordLetter.classList.contains("all"))
-        } else if (event.target.classList.contains("unused")) {
-            nonEmptyPotentialLetters = !WILDWORD_LETTERS.every(wildwordLetter => wildwordLetter.classList.contains("unused"))
-        } else if (event.target.classList.contains("present")) {
-            nonEmptyPotentialLetters = Object.values(letterStates).some(letterStateValues => letterStateValues != "absent" && "present" in letterStateValues)
-        } else if (event.target.classList.contains("correct")) {
-            nonEmptyPotentialLetters = Object.values(letterStates).some(letterStateValues => letterStateValues != "absent" && "correct" in letterStateValues)
+        if (event.target.classList.contains(ALL_CLASS)) {
+            nonEmptyPotentialLetters = !WILDWORD_LETTERS.every(wildwordLetter => wildwordLetter.classList.contains(ALL_CLASS))
+        } else if (event.target.classList.contains(UNUSED_CLASS)) {
+            nonEmptyPotentialLetters = !WILDWORD_LETTERS.every(wildwordLetter => wildwordLetter.classList.contains(UNUSED_CLASS))
+        } else if (event.target.classList.contains(PRESENT_CLASS)) {
+            nonEmptyPotentialLetters = Object.values(letterStates).some(letterStateValues => letterStateValues != ABSENT && PRESENT in letterStateValues)
+        } else if (event.target.classList.contains(CORRECT_CLASS)) {
+            nonEmptyPotentialLetters = Object.values(letterStates).some(letterStateValues => letterStateValues != ABSENT && CORRECT in letterStateValues)
         } else {
             throw new Error("Expected a wildcard with either 'all', 'unused', 'present' or 'correct' in its in classList, but found none")
         }
 
         if (nonEmptyPotentialLetters) {
-            event.target.classList.toggle("selected")
+            event.target.classList.toggle(SELECTED_CLASS)
             wildcardSelected = event.target
         } else {
             console.log("there are no potential positions for that wildcard")
@@ -316,33 +340,33 @@ function wildwordLetterClicked(event) {
         return
     }
 
-    if (!event.target.classList.contains("potential")) {
+    if (!event.target.classList.contains(POTENTIAL_CLASS)) {
         console.log("can't place wildcard here")
         return
     }
 
-    event.target.classList.remove("potential")
-    event.target.classList.remove("all")
-    event.target.classList.remove("unused")
-    event.target.classList.remove("correct")
+    event.target.classList.remove(POTENTIAL_CLASS)
+    event.target.classList.remove(ALL_CLASS)
+    event.target.classList.remove(UNUSED_CLASS)
+    event.target.classList.remove(CORRECT_CLASS)
 
     switch (wildcardSelected.id) {
-        case WILDCARD_ALL:
-            event.target.classList.add("all")
+        case WILDCARD_ID_ALL:
+            event.target.classList.add(ALL_CLASS)
             event.target.children[0].innerText = WILDLETTER_ALL
             break
-        case WILDCARD_UNUSED:
-            event.target.classList.add("unused")
+        case WILDCARD_ID_UNUSED:
+            event.target.classList.add(UNUSED_CLASS)
             event.target.children[0].innerText = WILDLETTER_UNUSED
             break
-        case WILDCARD_CORRECT:
-            event.target.classList.add("correct")
+        case WILDCARD_ID_CORRECT:
+            event.target.classList.add(CORRECT_CLASS)
             var wildwordLetterPosition = WILDWORD_LETTERS.findIndex(wildwordLetter => wildwordLetter.id == event.target.id)
             findAndSetCorrectLetterAtPosition(wildwordLetterPosition, event.target.children[0])
             break
     }
 
-    wildcardSelected.classList.toggle("selected")
+    wildcardSelected.classList.toggle(SELECTED_CLASS)
     wildcardSelected = null
 
     updateWildwordLetters()
@@ -351,13 +375,13 @@ function wildwordLetterClicked(event) {
 }
 
 function removeWildwordLettersPotential() {
-    WILDWORD_LETTERS.forEach(wildwordLetter => wildwordLetter.classList.remove("potential"))
+    WILDWORD_LETTERS.forEach(wildwordLetter => wildwordLetter.classList.remove(POTENTIAL_CLASS))
 }
 
-function addPotentialToWildwordLetterIfNot(wildwordLetterType) {
+function addPotentialToWildwordLetterIfNot(wildwordLetterClassType) {
     WILDWORD_LETTERS.forEach(wildwordLetter => {
-        if (!wildwordLetter.classList.contains(wildwordLetterType)) {
-            wildwordLetter.classList.add("potential")
+        if (!wildwordLetter.classList.contains(wildwordLetterClassType)) {
+            wildwordLetter.classList.add(POTENTIAL_CLASS)
         }
     })
 }
@@ -370,30 +394,30 @@ function updateWildwordLetters() {
         removeWildwordLettersPotential()
     } else {
         switch (wildcardSelected.id) {
-            case WILDCARD_ALL:
-                addPotentialToWildwordLetterIfNot("all")
+            case WILDCARD_ID_ALL:
+                addPotentialToWildwordLetterIfNot(ALL_CLASS)
                 break
                 
-            case WILDCARD_UNUSED:
-                addPotentialToWildwordLetterIfNot("unused")
+            case WILDCARD_ID_UNUSED:
+                addPotentialToWildwordLetterIfNot(UNUSED_CLASS)
                 break
 
-            case WILDCARD_CORRECT:
+            case WILDCARD_ID_CORRECT:
                 let correct_letters_positions = new Set()
 
                 for (let [_, value] of Object.entries(letterStates)) {
-                    if (value == "absent") {
+                    if (value == ABSENT) {
                         continue
                     }
 
-                    if ("correct" in value) {
-                        value["correct"].forEach(position => correct_letters_positions.add(position))
+                    if (CORRECT in value) {
+                        value[CORRECT].forEach(position => correct_letters_positions.add(position))
                     }
                 }
                 
                 for (let position of correct_letters_positions) {
-                    if (!WILDWORD_LETTERS[position].classList.contains("correct")) {
-                        WILDWORD_LETTERS[position].classList.add("potential")
+                    if (!WILDWORD_LETTERS[position].classList.contains(CORRECT_CLASS)) {
+                        WILDWORD_LETTERS[position].classList.add(POTENTIAL_CLASS)
                     }
                 }
 
@@ -404,11 +428,11 @@ function updateWildwordLetters() {
 
 function findAndSetCorrectLetterAtPosition(position, element) {
     for (let [letter, value] of Object.entries(letterStates)) {
-        if (value == "absent") {
+        if (value == ABSENT) {
             continue
         }
 
-        if ("correct" in value && value["correct"].includes(position)) {
+        if (CORRECT in value && value[CORRECT].includes(position)) {
             element.innerText = letter
             return
         }
@@ -429,7 +453,7 @@ function getAllowedLettersAtPosition() {
         } else if (wildwordLetter.children[0].innerText == WILDLETTER_UNUSED) {
             let unused_letters = new Set(ALPHABET)
             for (let [letter, value] of Object.entries(letterStates)) {
-                if (value != "asbent") {
+                if (value != ABSENT) {
                     unused_letters.delete(letter)
                 }
             }
@@ -446,11 +470,11 @@ function getAllowedLettersAtPosition() {
         if (checked) {
             let presentLetter = presentWildcard.children[0].children[0].innerText.toLowerCase()
             for (let [letter, value] of Object.entries(letterStates)) {
-                if (value == "asbent") {
+                if (value == ABSENT) {
                     continue
                 }
-                if (letter == presentLetter && "present" in value) {
-                    for (let position of value["present"]) {
+                if (letter == presentLetter && PRESENT in value) {
+                    for (let position of value[PRESENT]) {
                         allowed_letters_at_position[position].delete(letter)
                         console.log(`deleted letter '${letter}' from position ${position}`)
                     }

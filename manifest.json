@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "WordlHelper",
-    "version": "1.3",
+    "version": "2.0",
     "description": "Solving Wordle has never been easier!",
     
     "icons": {
