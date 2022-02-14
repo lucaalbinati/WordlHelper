@@ -8,7 +8,10 @@ const GET_LETTER_STATES_HEADER = "getLetterStates"
 const GITHUB_PROJECT_URL = "https://github.com/lucaalbinati/WordlHelper"
 const WORD_LIST_URL = "https://raw.githubusercontent.com/lucaalbinati/WordlHelper/main/words-sorted-by-frequency.txt"
 
+const ALPHABET = Array.from("abcdefghijklmnopqrstuvwxyz")
+
 const WILDCARDS = Array.from(document.getElementsByClassName("wildcard"))
+const PRESENT_WILDCARDS = () => document.getElementsByClassName("present-wildcard-container")[0].children
 const WILDWORD_LETTERS = Array.from(document.getElementsByClassName("wildword-letter"))
 
 const WILDCARD_ALL = "wildcard-all"
@@ -46,6 +49,7 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
 
         console.log(`received positive response for '${GET_LETTER_STATES_HEADER}' message, proceeding with popup load up`)
         letterStates = response.letterStates
+        addPresentWildcardsToUI()
 
         await loadWildword()
         updateFilteredWords()
@@ -169,6 +173,44 @@ function loadWildword() {
 //  Wildcard & Wildword Logic & UI  //
 //////////////////////////////////////
 
+function addPresentWildcardsToUI() {
+    let presentWildcardContainer = document.getElementsByClassName("present-wildcard-container")[0]
+
+    for (let [letter, value] of Object.entries(letterStates)) {
+        if (value == "absent") {
+            continue
+        }
+
+        if ("present" in value) {
+            let wildcardContainerElement = document.createElement("div")
+            wildcardContainerElement.classList = "wildcard-container"
+
+            let presentWildcardDivElement = document.createElement("div")
+            presentWildcardDivElement.classList = "wildcard present"
+
+            let presentWildcardLabelElement = document.createElement("div")
+            presentWildcardLabelElement.classList = "wildcard-label"
+            let label = document.createTextNode(letter)
+            
+            let template = document.createElement("template")
+            template.innerHTML = '<label class="switch"><input type="checkbox"><span class="slider round"></span></label>'.trim()
+            let presentWildcardToggleSwitchElement = template.content.firstChild            
+            
+            presentWildcardLabelElement.appendChild(label)
+            presentWildcardDivElement.appendChild(presentWildcardLabelElement)
+            wildcardContainerElement.appendChild(presentWildcardDivElement)
+            wildcardContainerElement.appendChild(presentWildcardToggleSwitchElement)
+
+            presentWildcardContainer.appendChild(wildcardContainerElement)
+
+            presentWildcardToggleSwitchElement.onclick = function(event) {
+                // saveToggleStates() TODO
+                updateFilteredWords()
+            }
+        }
+    }
+}
+
 function wildcardClicked(event) {
     console.log(`wildcard (id='${event.target.id}') clicked`)
 
@@ -225,7 +267,6 @@ function wildwordLetterClicked(event) {
     event.target.classList.remove("potential")
     event.target.classList.remove("all")
     event.target.classList.remove("unused")
-    event.target.classList.remove("present")
     event.target.classList.remove("correct")
 
     switch (wildcardSelected.id) {
@@ -236,11 +277,6 @@ function wildwordLetterClicked(event) {
         case WILDCARD_UNUSED:
             event.target.classList.add("unused")
             event.target.children[0].innerText = WILDLETTER_UNUSED
-            break
-        case WILDCARD_PRESENT:
-            event.target.classList.add("present")
-            var wildwordLetterPosition = WILDWORD_LETTERS.findIndex(wildwordLetter => wildwordLetter.id == event.target.id)
-            findAndSetPresentLettersAtPosition(wildwordLetterPosition, event.target.children[0])
             break
         case WILDCARD_CORRECT:
             event.target.classList.add("correct")
@@ -284,30 +320,6 @@ function updateWildwordLetters() {
             case WILDCARD_UNUSED:
                 addPotentialToWildwordLetterIfNot("unused")
                 break
-            
-            case WILDCARD_PRESENT:
-                // TODO remove from potential positions, the positions we know are CORRECT
-                let present_letters_positions = new Set()
-
-                for (let [_, value] of Object.entries(letterStates)) {
-                    if (value == "absent") {
-                        continue
-                    }
-
-                    if ("present" in value) {
-                        value["present"].forEach(position => {
-                            [0, 1, 2, 3, 4].filter(p => p != position).forEach(pos => present_letters_positions.add(pos))
-                        })
-                    }
-                }
-
-                for (let position of present_letters_positions) {
-                    if (!WILDWORD_LETTERS[position].classList.contains("present")) {
-                        WILDWORD_LETTERS[position].classList.add("potential")
-                    }
-                }
-
-                break
 
             case WILDCARD_CORRECT:
                 let correct_letters_positions = new Set()
@@ -333,28 +345,6 @@ function updateWildwordLetters() {
     }
 }
 
-function findAndSetPresentLettersAtPosition(position, element) {
-    var present_letters = new Set()
-
-    for (let [letter, value] of Object.entries(letterStates)) {
-        if (value == "absent") {
-            continue
-        }
-
-        if ("present" in value && !value["present"].includes(position)) {
-            present_letters.add(letter)
-        }
-    }
-
-    present_letters = Array.from(present_letters)
-
-    if (present_letters.length == 0) {
-        throw new Error(`Couldn't find any present letter at position ${position} even though there should be one (at least)`)
-    }
-    
-    element.innerText = present_letters.join("")
-}
-
 function findAndSetCorrectLetterAtPosition(position, element) {
     for (let [letter, value] of Object.entries(letterStates)) {
         if (value == "absent") {
@@ -370,19 +360,17 @@ function findAndSetCorrectLetterAtPosition(position, element) {
     throw new Error(`Couldn't find any correct letter at position ${position} even though there should be one`)
 }
 
-function updateFilteredWords() {
-    console.log("filtering words")
-
-    let alphabet = Array.from("abcdefghijklmnopqrstuvwxyz")
-
+function getAllowedLettersAtPosition() {
     let allowed_letters_at_position = {}
+
+    // add letters by looking at the wildword's wildcards
     for (let position = 0; position < WILDWORD_LETTERS.length; ++position) {
         let wildwordLetter = WILDWORD_LETTERS[position]
 
         if (wildwordLetter.children[0].innerText == WILDLETTER_ALL) {
-            allowed_letters_at_position[position] = new Set(alphabet)
+            allowed_letters_at_position[position] = new Set(ALPHABET)
         } else if (wildwordLetter.children[0].innerText == WILDLETTER_UNUSED) {
-            let unused_letters = new Set(alphabet)
+            let unused_letters = new Set(ALPHABET)
             for (let [letter, value] of Object.entries(letterStates)) {
                 if (value != "asbent") {
                     unused_letters.delete(letter)
@@ -395,18 +383,59 @@ function updateFilteredWords() {
         }
     }
 
+    // look at the toggled PRESENT letters
+    for (let presentWildcard of PRESENT_WILDCARDS()) {
+        let checked = presentWildcard.children[1].children[0].checked
+        if (checked) {
+            let presentLetter = presentWildcard.children[0].children[0].innerText.toLowerCase()
+            console.log(`checked for ${presentLetter}`)
+            for (let [letter, value] of Object.entries(letterStates)) {
+                if (value == "asbent") {
+                    continue
+                }
+                if (letter == presentLetter && "present" in value) {
+                    for (let position of value["present"]) {
+                        allowed_letters_at_position[position].delete(letter)
+                        console.log(`deleted letter '${letter}' from position ${position}`)
+                    }
+                }
+            }
+        }
+    }
+
+    return allowed_letters_at_position
+}
+
+function updateFilteredWords() {
+    console.log("filtering words")
+
+    let allowed_letters_at_position = getAllowedLettersAtPosition()
+
     chrome.storage.local.get("wordList", function(result) {
         if (result.wordList == null) {
             throw new Error("'wordList' should be present and loaded, but couldn't find it")
         }
 
         let filteredWords = result.wordList.filter(word => {
+            // on the first pass, filter the words enforcing which letters are allowed
+
             if (word.length != 5) {
                 return false
             }
 
             for (let position = 0; position < word.length; ++position) {
                 if (!allowed_letters_at_position[position].has(word[position])) {
+                    return false
+                }
+            }
+            return true
+        }).filter(word => {
+            // on the second pass, filter the words taking into account the PRESENT wildcards
+
+            for (let presentWildcard of PRESENT_WILDCARDS()) {
+                let checked = presentWildcard.children[1].children[0].checked
+                let letter = presentWildcard.children[0].children[0].innerText.toLowerCase()
+                if (checked && !word.includes(letter)) {
                     return false
                 }
             }
