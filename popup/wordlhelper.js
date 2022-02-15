@@ -51,14 +51,11 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
             return
         }
 
-        document.getElementById("loading").hidden = false
         await loadWordList()
-        document.getElementById("loading").hidden = true
-        document.getElementById("helper").hidden = false
 
         console.log(`received positive response for '${GET_LETTER_STATES_HEADER}' message, proceeding with popup load up`)
         letterStates = response.letterStates
-        addPresentWildcardsToUI()
+        await addPresentWildcardsToUI()
 
         await loadWildword()
         updateFilteredWords()
@@ -115,23 +112,40 @@ function setupResetWildwordEventListener() {
 ////////  Word List Setup  /////////
 ////////////////////////////////////
 
-function loadWordList() {
-    return new Promise(resolve => {
+async function loadWordList() {
+    document.getElementById("loading").hidden = false
+
+    let start = new Date().getUTCMilliseconds()
+    
+    let p = new Promise(resolve => {
         chrome.storage.local.get("wordList", function(result) {
             if (result.wordList == null) {
                 fetch(WORD_LIST_URL).then(r => r.text()).then(t => {
                     let wordList = t.split("\n")
                     chrome.storage.local.set({wordList}, () => {
                         console.log("loaded and stored 'wordList'")
-                        resolve()
+                        resolve(1)
                     })
                 })
             } else {
                 console.log("'wordList' has already been loaded")
-                resolve()
+                resolve(0)
             }
         })
     })
+    
+    let isAlreadyLoaded = await p.then(result => {
+        return result == 0
+    })
+
+    if (!isAlreadyLoaded) {
+        let time = new Date().getUTCMilliseconds() - start
+        let waitTime = Math.max(0, 2000 - time)
+        await new Promise(resolve => setTimeout(resolve, waitTime))
+    }
+
+    document.getElementById("loading").hidden = true
+    document.getElementById("helper").hidden = false
 }
 
 ////////////////////////////////////
