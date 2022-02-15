@@ -1,40 +1,38 @@
 
-////////////////////////////////////
-///////////  Constants  ////////////
-////////////////////////////////////
+import {
+    GET_LETTER_STATES_HEADER,
+    GITHUB_PROJECT_URL,
+    WORD_LIST_URL,
+    ALPHABET,
 
-const GET_LETTER_STATES_HEADER = "getLetterStates"
+    CORRECT,
+    PRESENT,
+    ABSENT
+} from '../constants/constants.js'
 
-const GITHUB_PROJECT_URL = "https://github.com/lucaalbinati/WordlHelper"
-const WORD_LIST_URL = "https://raw.githubusercontent.com/lucaalbinati/WordlHelper/main/words-sorted-by-frequency.txt"
+import {
+    WILDCARD_ID_ALL,
+    WILDCARD_ID_UNUSED,
+    WILDCARD_ID_CORRECT,
 
-const ALPHABET = Array.from("abcdefghijklmnopqrstuvwxyz")
+    WILDLETTER_ALL,
+    WILDLETTER_UNUSED,
 
-const WILDCARDS = Array.from(document.getElementsByClassName("wildcard"))
-const PRESENT_WILDCARDS = () => document.getElementsByClassName("present-wildcard-container")[0].children
-const WILDWORD_LETTERS = Array.from(document.getElementsByClassName("wildword-letter"))
-
-const WILDCARD_ID_ALL = "wildcard-all"
-const WILDCARD_ID_UNUSED = "wildcard-unused"
-const WILDCARD_ID_CORRECT = "wildcard-correct"
-
-const WILDLETTER_ALL = "✽"
-const WILDLETTER_UNUSED = "?"
-
-const CORRECT = "correct"
-const PRESENT = "present"
-const ABSENT = "absent"
-
-const CORRECT_CLASS = "correct"
-const PRESENT_CLASS = "present"
-const UNUSED_CLASS = "unused"
-const POTENTIAL_CLASS = "potential"
-const SELECTED_CLASS = "selected"
-const ALL_CLASS = "all"
+    CORRECT_CLASS,
+    PRESENT_CLASS,
+    UNUSED_CLASS,
+    POTENTIAL_CLASS,
+    SELECTED_CLASS,
+    ALL_CLASS
+} from '../constants/html-css-constants.js'
 
 ////////////////////////////////////
 //////////////  MAIN  //////////////
 ////////////////////////////////////
+
+const WILDCARDS = Array.from(document.getElementsByClassName("wildcard"))
+const PRESENT_WILDCARDS = () => document.getElementsByClassName("present-wildcard-container")[0].children
+const WILDWORD_LETTERS = Array.from(document.getElementsByClassName("wildword-letter"))
 
 let wildcardSelected = null
 var letterStates = null
