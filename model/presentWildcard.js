@@ -36,14 +36,6 @@ export class PresentWildcard {
     toggle() {
         this.toggled = !this.toggled
     }
-
-    equals(o) {
-        if (o != null && typeof o == typeof this) {
-            return this.letter == o.letter && this.toggled == o.toggled
-        } else {
-            return false
-        }
-    }
 }
 
 class PresentWildcardsStorageObject {

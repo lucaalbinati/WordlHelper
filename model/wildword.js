@@ -4,7 +4,6 @@ import {
     WILDWORD_LETTER_UNUSED_CLASS,
     WILDWORD_LETTER_CORRECT_CLASS,
     WILDWORD_LETTER_POTENTIAL_CLASS,
-
     LETTER_ALL,
     LETTER_UNUSED
 } from '../constants/html-css-constants.js'
@@ -22,7 +21,7 @@ import {
 } from './helper.js'
 
 export class WildwordLetter {
-    constructor(letter, cssClasses=null) {
+    constructor(letter) {
         this.letter = letter
         this.updateCssClasses()
     }
@@ -94,11 +93,7 @@ export class WildwordLetter {
 export class Wildword {
     constructor(wildwordLetters=null) {
         this.updateLastModified()
-        if (wildwordLetters == null) {
-            this.wildwordLetters = this.getNewDefaultWildwordLetters()
-        } else {
-            this.wildwordLetters = wildwordLetters
-        }
+        this.wildwordLetters = wildwordLetters == null ? this.getNewDefaultWildwordLetters() : wildwordLetters
     }
 
     getWildwordLetters() {

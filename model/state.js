@@ -2,7 +2,6 @@ import {
     WILDCARD_ALL_TYPE,
     WILDCARD_UNUSED_TYPE,
     WILDCARD_CORRECT_TYPE,
-    PRESENT_LETTER_STATE,
     CORRECT_LETTER_STATE
 } from '../constants/state-constants.js'
 
@@ -12,12 +11,11 @@ import {
 
 import {
     savePresentWildcardsToStorage,
-    loadPresentWildcardsFromStorage,
-    PresentWildcard
+    loadPresentWildcardsFromStorage
 } from './presentWildcard.js'
 
 import {
-    loadWildwordStateFromStorage, Wildword
+    loadWildwordStateFromStorage
 } from './wildword.js'
 import { LETTER_ALL, LETTER_UNUSED } from '../constants/html-css-constants.js'
 
