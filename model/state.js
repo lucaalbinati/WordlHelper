@@ -85,7 +85,9 @@ export class State {
             this.wildcards[wilcardType].select()
         }
 
-        this.updateWildwordLettersPotential()
+        if (!this.updateWildwordLettersPotential()) {
+            this.unselectWildcard()
+        }
         this.updateUICallback()
     }
 
@@ -128,7 +130,7 @@ export class State {
     }
 
     updateWildwordLettersPotential() {
-        this.wildword.updateWildwordLettersPotential(this.getSelectedWildcard(), this.letterStates)
+        return this.wildword.updateWildwordLettersPotential(this.getSelectedWildcard(), this.letterStates)
     }
 
     togglePresentWildcard(letter) {

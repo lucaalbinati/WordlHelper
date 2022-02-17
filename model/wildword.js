@@ -111,6 +111,7 @@ export class Wildword {
 
     updateWildwordLettersPotential(wildcardSelected, letterStates) {
         console.log("updating wildword letters potential")
+        var hasAtLeastOnePotential = false
 
         if (wildcardSelected == null) {
             console.log(`no wildcard is selected, so we remove CSS class '${WILDWORD_LETTER_POTENTIAL_CLASS}' from all wildword letters`)
@@ -122,6 +123,7 @@ export class Wildword {
                     for (let [_, wildwordLetter] of Object.entries(this.wildwordLetters)) {
                         if (wildwordLetter.getType() != wildcardSelected.getType()) {
                             wildwordLetter.addClass(WILDWORD_LETTER_POTENTIAL_CLASS)
+                            hasAtLeastOnePotential = true
                         }
                     }
                     break
@@ -129,6 +131,7 @@ export class Wildword {
                     this.getPositionsOfCorrectWildwordLetters(letterStates).forEach(position => {
                         if (!this.wildwordLetters[position].hasCorrectCssClass()) {
                             this.wildwordLetters[position].addClass(WILDWORD_LETTER_POTENTIAL_CLASS)
+                            hasAtLeastOnePotential = true
                         }
                     })
                     break
@@ -136,6 +139,7 @@ export class Wildword {
         }
 
         this.updateLastModified()
+        return hasAtLeastOnePotential
     }
 
     getPositionsOfCorrectWildwordLetters(letterStates) {
