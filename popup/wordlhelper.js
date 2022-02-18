@@ -40,11 +40,11 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         }
 
         console.log(`received positive response for '${GET_LETTER_STATES_HEADER}' message, proceeding with popup load up`)
+        
+        let wordList = await loadWordList()
         let letterStates = response.letterStates
- 
-        let state = new State(letterStates, onUpdateUICallback)
+        let state = new State(letterStates, wordList, onUpdateUICallback)
 
-        await loadWordList()
         await state.loadFromStorage()
 
         setupUI(state)
@@ -66,24 +66,24 @@ async function loadWordList() {
         chrome.storage.local.get("wordList", function(result) {
             if (result.wordList == null) {
                 fetch(WORD_LIST_URL).then(r => r.text()).then(t => {
-                    let wordList = t.split("\n")
+                    let wordList = t.split("\n").filter(word => word.length == 5)
                     chrome.storage.local.set({wordList}, () => {
                         console.log("loaded and stored 'wordList'")
-                        resolve(1)
+                        resolve({"wordList": wordList, "wasAlreadyLoaded": false})
                     })
                 })
             } else {
                 console.log("'wordList' has already been loaded")
-                resolve(0)
+                resolve({"wordList": result.wordList, "wasAlreadyLoaded": true})
             }
         })
     })
     
-    let isAlreadyLoaded = await p.then(result => {
-        return result == 0
+    let wordListObj = await p.then(result => {
+        return result
     })
 
-    if (!isAlreadyLoaded) {
+    if (!wordListObj["wasAlreadyLoaded"]) {
         let time = new Date().getUTCMilliseconds() - start
         let waitTime = Math.max(0, 2000 - time)
         await new Promise(resolve => setTimeout(resolve, waitTime))
@@ -91,6 +91,8 @@ async function loadWordList() {
 
     document.getElementById("loading").hidden = true
     document.getElementById("helper").hidden = false
+
+    return wordListObj["wordList"]
 }
 
 ////////////////////////////////////
@@ -182,10 +184,6 @@ function setupWildwordUI(state) {
     }
 }
 
-// function setupFilteredWordListUI(state) {
-
-// }
-
 ////////////////////////////////////
 ///////////  Update UI  ////////////
 ////////////////////////////////////
@@ -196,7 +194,7 @@ function onUpdateUICallback(state) {
     updateWildcardUI(state)
     updatePresentWildcardUI(state)
     updateWildwordUI(state)
-    // updateFilteredWordListUI(state)
+    updateFilteredWordListUI(state)
 }
 
 function updateWildcardUI(state) {
@@ -219,9 +217,15 @@ function updateWildwordUI(state) {
     }
 }
 
-// function updateFilteredWordListUI() {
-
-// }
+function updateFilteredWordListUI(state) {
+    let wordListLength = state.getFilteredWordList().length
+    if (wordListLength > 0) {
+        document.getElementById("possible-words-title").innerText = `${wordListLength} words match these wildcards`
+    } else {
+        document.getElementById("possible-words-title").innerText = "No words match these wildcards"
+    }
+    document.getElementById("possible-words-list").innerText = state.getFilteredWordList().join("\n")
+}
 
 ////////////////////////////////////////////
 //  Wildcards & Wildword Event Listeners  //

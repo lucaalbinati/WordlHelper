@@ -1,4 +1,8 @@
 import {
+    ALPHABET
+} from '../constants/constants.js'
+
+import {
     WILDWORD_LETTER_CLASS,
     WILDWORD_LETTER_ALL_CLASS,
     WILDWORD_LETTER_UNUSED_CLASS,
@@ -88,6 +92,19 @@ export class WildwordLetter {
                 break
         }
     }
+
+    getAllowedLetters(letterStates) {
+        switch (this.letter) {
+            case LETTER_ALL:
+                return new Set(ALPHABET)
+            case LETTER_UNUSED:
+                let unused_letters = new Set(ALPHABET)
+                Object.keys(letterStates).forEach(letter => unused_letters.delete(letter))
+                return unused_letters
+            default:
+                return new Set(this.letter)
+        }
+    }
 }
 
 export class Wildword {
@@ -158,6 +175,15 @@ export class Wildword {
         for (let [_, wildwordLetter] of Object.entries(this.wildwordLetters)) {
             wildwordLetter.removeClass(WILDWORD_LETTER_POTENTIAL_CLASS)
         }
+    }
+
+    isValidWord(word, letterStates) {
+        for (let [position, wildwordLetter] of Object.entries(this.wildwordLetters)) {
+            if (!wildwordLetter.getAllowedLetters(letterStates).has(word[position])) {
+                return false
+            }
+        }
+        return true
     }
 
     getNewDefaultWildwordLetters() {

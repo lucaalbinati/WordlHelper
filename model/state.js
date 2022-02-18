@@ -2,7 +2,8 @@ import {
     WILDCARD_ALL_TYPE,
     WILDCARD_UNUSED_TYPE,
     WILDCARD_CORRECT_TYPE,
-    CORRECT_LETTER_STATE
+    CORRECT_LETTER_STATE,
+    PRESENT_LETTER_STATE
 } from '../constants/state-constants.js'
 
 import {
@@ -20,8 +21,9 @@ import {
 import { LETTER_ALL, LETTER_UNUSED } from '../constants/html-css-constants.js'
 
 export class State {
-    constructor(letterStates, updateUICallback) {
+    constructor(letterStates, wordList, updateUICallback) {
         this.letterStates = letterStates
+        this.wordList = wordList
         this.updateUICallback = () => {
             this.save()
             updateUICallback(this)
@@ -46,6 +48,7 @@ export class State {
     }
 
     getPresentWildcards() {
+        console.log(this.letterStates)
         return this.presentWildcards
     }
 
@@ -142,6 +145,42 @@ export class State {
         }
     }
 
+    getFilteredWordList() {
+        let filteredWords = this.wordList.filter(word => {
+            // on the first pass, filter the words enforcing which letters are allowed
+            return this.wildword.isValidWord(word, this.letterStates)
+        }).filter(word => {
+            // on the second pass, filter the words taking into account the PRESENT wildcards
+            var obeyPresentWildcards = true
+
+            let presentLettersWithPositions = {}
+            for (let [letter, value] of Object.entries(this.letterStates)) {
+                if (PRESENT_LETTER_STATE in value) {
+                    presentLettersWithPositions[letter] = value[PRESENT_LETTER_STATE]
+                }
+            }
+
+            for (let presentWildcard of this.presentWildcards) {
+                if (presentWildcard.isToggled()) {
+                    let letter = presentWildcard.getLetter()
+                    if (!word.includes(letter)) {
+                        return false
+                    }
+
+                    for (let bannedPositions of presentLettersWithPositions[letter]) {
+                        if (word[bannedPositions] == letter) {
+                            return false
+                        }
+                    }
+                }
+            }
+
+            return true
+        })
+
+        return filteredWords
+    }
+
     resetWildword() {
         this.wildword.reset()
         this.updateUICallback()
@@ -154,6 +193,7 @@ export class State {
 
     async loadFromStorage() {
         this.presentWildcards = await loadPresentWildcardsFromStorage(this.letterStates).then(result => {
+            // TODO remove from this the letters that are now CORRECT
             return result
         })
         this.wildword = await loadWildwordStateFromStorage(this.letterStates).then(result => {
