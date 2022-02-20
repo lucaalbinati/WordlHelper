@@ -36,6 +36,10 @@ export class PresentWildcard {
     toggle() {
         this.toggled = !this.toggled
     }
+
+    setToggle(newToggle) {
+        this.toggled = newToggle
+    }
 }
 
 class PresentWildcardsStorageObject {
@@ -63,7 +67,15 @@ export async function loadPresentWildcardsFromStorage(letterStates) {
 
                 if (!isOutdated(lastModified)) {
                     console.log(`found '${PRESENT_WILDCARDS_KEY}' in storage`)
-                    resolve(convertToObjects(presentWildcardsObjs))
+                    let storedPresentWildcards = convertToObjects(presentWildcardsObjs)
+                    let presentWildcards = getPresentWildcardsFromLetterStates(letterStates).forEach(presentWildcard => {
+                        for (let storedPresentWildcard of storedPresentWildcards) {
+                            if (presentWildcard.getLetter() == storedPresentWildcard.getLetter()) {
+                                presentWildcard.setToggle(storedPresentWildcard.isToggled())
+                            }
+                        }
+                    })
+                    resolve(presentWildcards)
                     return
                 } else {
                     console.log(`found '${PRESENT_WILDCARDS_KEY}' in storage, but it is outdated; resetting it`)

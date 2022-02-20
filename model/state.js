@@ -48,7 +48,6 @@ export class State {
     }
 
     getPresentWildcards() {
-        console.log(this.letterStates)
         return this.presentWildcards
     }
 
@@ -146,6 +145,7 @@ export class State {
     }
 
     getFilteredWordList() {
+        // TODO maybe also remove words that have been tried ?
         let filteredWords = this.wordList.filter(word => {
             // on the first pass, filter the words enforcing which letters are allowed
             return this.wildword.isValidWord(word, this.letterStates)
@@ -193,7 +193,6 @@ export class State {
 
     async loadFromStorage() {
         this.presentWildcards = await loadPresentWildcardsFromStorage(this.letterStates).then(result => {
-            // TODO remove from this the letters that are now CORRECT
             return result
         })
         this.wildword = await loadWildwordStateFromStorage(this.letterStates).then(result => {
