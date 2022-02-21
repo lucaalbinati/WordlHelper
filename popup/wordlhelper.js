@@ -45,7 +45,8 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         document.getElementById("loading").hidden = false
         let wordList = await loadWordList()
         let letterStates = response.letterStates
-        let state = new State(letterStates, wordList, onUpdateUICallback)
+        let wordsTried = response.wordsTried
+        let state = new State(letterStates, wordsTried, wordList, onUpdateUICallback)
         await state.loadFromStorage()
         setupUI(state)
         document.getElementById("loading").hidden = true

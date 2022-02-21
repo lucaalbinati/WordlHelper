@@ -18,10 +18,10 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         case GET_LETTER_STATES_HEADER:
             console.log(`received a '${GET_LETTER_STATES_HEADER}' message from '${sender.id}'`)
             let letter_states = getLetterStates()
-            console.log(`fetched 'letter_states' and sending the answer back to '${sender.id}'`)
-            sendResponse({letterStates: letter_states})
+            let words_tried = getWordsTried()
+            console.log(`fetched 'letter_states' and 'words_tried' and sending the answer back to '${sender.id}'`)
+            sendResponse({letterStates: letter_states, wordsTried: words_tried})
             break
-            
         default:
             console.log(`received a message from '${sender.id}' with unknown header '${request.header}'`)
     }
@@ -37,7 +37,7 @@ function hasDuplicates(array) {
 
 function scrapeLetterStates() {
     let letter_states = {}
-    let wordRows = document.getElementsByTagName("game-app")[0].shadowRoot.children[1].children[1].children[0].children[0].children
+    let wordRows = getWordRows()
 
     for (let wordRow of wordRows) {
         if (wordRow.getAttribute("letters") == "") {
@@ -99,4 +99,20 @@ function getLetterStates() {
     var letter_states = scrapeLetterStates()
     cleanLetterStates(letter_states)
     return letter_states
+}
+
+function getWordsTried() {
+    let wordsTried = new Set()
+    let wordRows = getWordRows()
+    for (let wordRow of wordRows) {
+        let wordTried = wordRow.getAttribute("letters")
+        if (wordTried != "") {
+            wordsTried.add(wordTried)
+        }
+    }
+    return wordsTried
+}
+
+function getWordRows() {
+    return document.getElementsByTagName("game-app")[0].shadowRoot.children[1].children[1].children[0].children[0].children
 }

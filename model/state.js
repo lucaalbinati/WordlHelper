@@ -21,8 +21,9 @@ import {
 import { LETTER_ALL, LETTER_UNUSED } from '../constants/html-css-constants.js'
 
 export class State {
-    constructor(letterStates, wordList, updateUICallback) {
+    constructor(letterStates, wordsTried, wordList, updateUICallback) {
         this.letterStates = letterStates
+        this.wordsTried = wordsTried
         this.wordList = wordList
         this.updateUICallback = () => {
             this.save()
@@ -145,10 +146,9 @@ export class State {
     }
 
     getFilteredWordList() {
-        // TODO maybe also remove words that have been tried ?
         let filteredWords = this.wordList.filter(word => {
             // on the first pass, filter the words enforcing which letters are allowed
-            return this.wildword.isValidWord(word, this.letterStates)
+            return !this.wordsTried.has(word) && this.wildword.isValidWord(word, this.letterStates)
         }).filter(word => {
             // on the second pass, filter the words taking into account the PRESENT wildcards
             var obeyPresentWildcards = true
