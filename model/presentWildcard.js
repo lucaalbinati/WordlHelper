@@ -68,7 +68,8 @@ export async function loadPresentWildcardsFromStorage(letterStates) {
                 if (!isOutdated(lastModified)) {
                     console.log(`found '${PRESENT_WILDCARDS_KEY}' in storage`)
                     let storedPresentWildcards = convertToObjects(presentWildcardsObjs)
-                    let presentWildcards = getPresentWildcardsFromLetterStates(letterStates).forEach(presentWildcard => {
+                    let presentWildcards = getPresentWildcardsFromLetterStates(letterStates)
+                    presentWildcards.forEach(presentWildcard => {
                         for (let storedPresentWildcard of storedPresentWildcards) {
                             if (presentWildcard.getLetter() == storedPresentWildcard.getLetter()) {
                                 presentWildcard.setToggle(storedPresentWildcard.isToggled())

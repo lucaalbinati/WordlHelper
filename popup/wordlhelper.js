@@ -7,7 +7,8 @@ import {
 import {
     WILDCARD_ID_ALL,
     WILDCARD_ID_UNUSED,
-    WILDCARD_ID_CORRECT
+    WILDCARD_ID_CORRECT,
+    WILDWORD_LETTER_LABEL_CLASS
 } from '../constants/html-css-constants.js'
 
 import {
@@ -213,6 +214,7 @@ function updatePresentWildcardUI(state) {
 function updateWildwordUI(state) {
     for (let [position, wildwordLetter] of Object.entries(state.getWildword().getWildwordLetters())) {
         document.getElementById(`wildword-letter-${position}`).classList = wildwordLetter.getCssClasses().join(" ")
+        document.getElementById(`wildword-letter-label-${position}`).classList = WILDWORD_LETTER_LABEL_CLASS
         document.getElementById(`wildword-letter-label-${position}`).innerText = wildwordLetter.getLetter()
     }
 }
