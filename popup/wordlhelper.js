@@ -42,13 +42,15 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
 
         console.log(`received positive response for '${GET_LETTER_STATES_HEADER}' message, proceeding with popup load up`)
         
+        document.getElementById("loading").hidden = false
         let wordList = await loadWordList()
         let letterStates = response.letterStates
         let state = new State(letterStates, wordList, onUpdateUICallback)
-
         await state.loadFromStorage()
-
         setupUI(state)
+        document.getElementById("loading").hidden = true
+        document.getElementById("helper").hidden = false
+
         onUpdateUICallback(state)
     })
 })
@@ -59,7 +61,6 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
 
 async function loadWordList() {
     console.log(`loading word list for the first time`)
-    document.getElementById("loading").hidden = false
 
     let start = new Date().getUTCMilliseconds()
     
@@ -89,9 +90,6 @@ async function loadWordList() {
         let waitTime = Math.max(0, 2000 - time)
         await new Promise(resolve => setTimeout(resolve, waitTime))
     }
-
-    document.getElementById("loading").hidden = true
-    document.getElementById("helper").hidden = false
 
     return wordListObj["wordList"]
 }
