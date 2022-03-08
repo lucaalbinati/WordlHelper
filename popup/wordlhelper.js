@@ -41,11 +41,10 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         }
 
         console.log(`received positive response for '${GET_LETTER_STATES_HEADER}' message, proceeding with popup load up`)
-        
         document.getElementById("loading").hidden = false
         let wordList = await loadWordList()
         let letterStates = response.letterStates
-        let wordsTried = response.wordsTried
+        let wordsTried = new Set(response.wordsTried)
         let state = new State(letterStates, wordsTried, wordList, onUpdateUICallback)
         await state.loadFromStorage()
         setupUI(state)

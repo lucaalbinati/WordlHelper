@@ -20,7 +20,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
             let letter_states = getLetterStates()
             let words_tried = getWordsTried()
             console.log(`fetched 'letter_states' and 'words_tried' and sending the answer back to '${sender.id}'`)
-            sendResponse({letterStates: letter_states, wordsTried: words_tried})
+            sendResponse({letterStates: letter_states, wordsTried: Array.from(words_tried)})
             break
         default:
             console.log(`received a message from '${sender.id}' with unknown header '${request.header}'`)
